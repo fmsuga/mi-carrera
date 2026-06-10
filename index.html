@@ -1,434 +1,12 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Mi Carrera · Analista Programador</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  /* Medianoche + dorado */
-  --bg:#0D1117;
-  --surface:#131923;
-  --surface2:#1A2232;
-  --border:#1E2D42;
-  --text:#E8EDF5;
-  --text2:#7A93B0;
-  --text3:#4A6280;
-  --blue:#2563A8;
-  --blue-light:#0F2040;
-  --blue-dark:#1A4A8A;
-  --green:#1E8A55;
-  --green-light:#0A2218;
-  --green-dark:#25B06A;
-  --yellow:#C9921A;
-  --yellow-light:#1E1400;
-  --yellow-dark:#E8AA30;
-  --red:#A03030;
-  --red-light:#200A0A;
-  --red-dark:#CC4444;
-  --purple:#4A2D7A;
-  --purple-light:#1C1230;
-  --gold:#C9921A;
-  --gold-bright:#E8AA30;
-  --radius:12px;
-  --radius-sm:7px;
-  --shadow:0 1px 4px rgba(0,0,0,0.3),0 1px 2px rgba(0,0,0,0.2);
-  --shadow-md:0 4px 24px rgba(0,0,0,0.5);
-}
-body{
-  font-family:'Inter',sans-serif;
-  background:var(--bg);
-  color:var(--text);
-  min-height:100vh;
-  font-size:15px;
-  -webkit-font-smoothing:antialiased;
-  position:relative;
-  overflow-x:hidden;
-}
-
-/* BG BLOBS — azul frío atmosférico */
-body::before{
-  content:'';
-  position:fixed;
-  inset:0;
-  z-index:0;
-  pointer-events:none;
-  background:
-    radial-gradient(ellipse 70% 50% at 15% 20%, rgba(20,60,120,0.28) 0%, transparent 70%),
-    radial-gradient(ellipse 55% 40% at 85% 70%, rgba(15,45,100,0.22) 0%, transparent 70%),
-    radial-gradient(ellipse 40% 30% at 50% 90%, rgba(25,70,140,0.15) 0%, transparent 60%),
-    radial-gradient(ellipse 30% 25% at 80% 10%, rgba(30,55,110,0.18) 0%, transparent 60%);
-}
-body>*{position:relative;z-index:1}
-
-/* HEADER */
-.header{
-  background:rgba(13,17,23,0.85);
-  backdrop-filter:blur(12px);
-  -webkit-backdrop-filter:blur(12px);
-  border-bottom:1px solid var(--border);
-  padding:0 16px;
-  display:flex;align-items:center;gap:0;
-  position:sticky;top:0;z-index:100;
-  height:56px;
-}
-.header-brand{
-  font-family:'Lora',serif;font-weight:700;font-size:16px;color:var(--text);
-  margin-right:auto;display:flex;align-items:center;gap:10px;
-  letter-spacing:-.01em;
-}
-.brand-crest{
-  width:28px;height:28px;border-radius:6px;
-  background:linear-gradient(135deg,#1A4A8A,#2563A8);
-  border:1px solid rgba(201,146,26,0.4);
-  display:flex;align-items:center;justify-content:center;
-  color:#fff;font-size:14px;font-family:'Lora',serif;font-weight:700;
-}
-.tab{
-  background:none;border:none;color:var(--text2);
-  font-family:'Inter',sans-serif;font-size:13px;font-weight:500;
-  padding:18px 13px;cursor:pointer;border-bottom:2px solid transparent;
-  margin-bottom:-1px;transition:color .15s,border-color .15s;
-  letter-spacing:.01em;
-}
-.tab:hover{color:var(--text)}
-.tab.active{color:var(--gold-bright);border-bottom-color:var(--gold-bright)}
-
-/* MAIN */
-main{max-width:700px;margin:0 auto;padding:20px 16px 80px}
-
-/* PAGE */
-.page{display:none}
-.page.active{display:block}
-
-/* HERO CARD */
-.hero{
-  background:linear-gradient(135deg,#0F2040 0%,#142A50 60%,#1A2D5A 100%);
-  border-radius:16px;padding:28px 24px 22px;margin-bottom:20px;color:#fff;
-  position:relative;overflow:hidden;
-  border:1px solid rgba(37,99,168,0.35);
-  border-bottom:3px solid var(--gold);
-  box-shadow:0 8px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
-}
-.hero::before{
-  content:'';position:absolute;top:-40%;right:-10%;
-  width:300px;height:300px;
-  background:radial-gradient(ellipse, rgba(37,99,168,0.2) 0%, transparent 70%);
-  border-radius:50%;
-}
-.hero::after{
-  content:'';position:absolute;bottom:-30%;left:20%;
-  width:200px;height:200px;
-  background:radial-gradient(ellipse, rgba(201,146,26,0.08) 0%, transparent 70%);
-  border-radius:50%;
-}
-.hero-label{font-size:11px;font-weight:600;opacity:.5;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px}
-.hero-promedio{
-  font-family:'Lora',serif;
-  font-size:58px;font-weight:700;line-height:1;margin-bottom:4px;position:relative;z-index:1;
-  letter-spacing:-.02em;
-  color:#E8EDF5;
-}
-.hero-promedio small{font-size:17px;font-weight:400;opacity:.45;font-family:'Inter',sans-serif}
-.hero-sub{font-size:13px;opacity:.55;margin-bottom:22px}
-
-/* PROGRESS BARS */
-.prog-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:4px;position:relative;z-index:1}
-.prog-item{}
-.prog-labels{display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px}
-.prog-labels span{opacity:.6}
-.prog-labels strong{opacity:.9;font-weight:600}
-.prog-track{height:5px;background:rgba(255,255,255,0.1);border-radius:3px;overflow:hidden}
-.prog-fill{height:100%;border-radius:3px;background:linear-gradient(90deg, var(--gold), var(--gold-bright));transition:width .7s cubic-bezier(.4,0,.2,1)}
-
-/* STATS */
-.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
-.stat-card{
-  background:var(--surface);border:1px solid var(--border);
-  border-radius:var(--radius);padding:14px 12px;text-align:center;
-  box-shadow:var(--shadow);
-  transition:border-color .2s;
-}
-.stat-card:hover{border-color:var(--blue-dark)}
-.stat-num{font-size:28px;font-weight:700;line-height:1}
-.stat-lbl{font-size:11px;color:var(--text2);margin-top:3px;font-weight:500}
-.stat-num.blue{color:#4A8FE0}
-.stat-num.green{color:var(--green-dark)}
-.stat-num.yellow{color:var(--gold-bright)}
-
-/* PRÓXIMOS */
-.section-title{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;font-family:'Inter',sans-serif}
-.exam-card{
-  background:var(--surface);border:1px solid var(--border);
-  border-radius:var(--radius);padding:14px 16px;margin-bottom:8px;
-  display:flex;align-items:center;gap:12px;box-shadow:var(--shadow);
-  transition:border-color .15s;
-}
-.exam-card:hover{border-color:var(--blue-dark)}
-.exam-icon{
-  width:40px;height:40px;border-radius:10px;
-  display:flex;align-items:center;justify-content:center;
-  font-size:20px;flex-shrink:0;
-}
-.exam-icon.near{background:rgba(201,146,26,0.12);color:var(--gold-bright)}
-.exam-icon.far{background:var(--blue-light);color:#4A8FE0}
-.exam-icon.today{background:var(--red-light);color:var(--red-dark)}
-.exam-info{flex:1;min-width:0}
-.exam-name{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.exam-sub{font-size:12px;color:var(--text2);margin-top:2px}
-.exam-badge{
-  font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;white-space:nowrap;flex-shrink:0;
-}
-.badge-soon{background:rgba(201,146,26,0.15);color:var(--gold-bright)}
-.badge-far{background:var(--blue-light);color:#4A8FE0}
-.badge-today{background:var(--red-light);color:var(--red-dark)}
-.badge-past{background:var(--surface2);color:var(--text2)}
-
-/* YEAR GROUP */
-.year-block{margin-bottom:28px}
-.year-heading{
-  display:flex;align-items:baseline;justify-content:space-between;
-  padding-bottom:8px;
-  border-bottom:1px solid var(--border);
-  margin-bottom:0;
-  cursor:pointer;
-  position:relative;
-}
-.year-heading::after{
-  content:'';
-  position:absolute;bottom:-1px;left:0;
-  height:2px;width:40px;
-  background:linear-gradient(90deg,var(--gold),transparent);
-}
-.year-heading:hover .year-name-text{color:var(--gold-bright)}
-.year-name-text{
-  font-family:'Lora',serif;font-size:17px;font-weight:700;
-  color:#C8D8F0;letter-spacing:-.01em;transition:color .15s;
-}
-.year-prog-mini{font-size:12px;color:var(--text3);font-weight:400}
-.year-table-wrap{display:none}
-.year-table-wrap.open{display:block}
-
-.mat-table{width:100%;border-collapse:collapse;font-size:13px}
-.mat-table thead tr{border-bottom:1px solid var(--border)}
-.mat-table th{
-  text-align:left;font-size:10px;font-weight:600;color:var(--text3);
-  text-transform:uppercase;letter-spacing:.07em;
-  padding:8px 10px 6px;
-}
-.mat-table th:last-child{text-align:right}
-.mat-table td{padding:0;border-bottom:1px solid rgba(30,45,66,0.7);vertical-align:top}
-.mat-table tr:last-child td{border-bottom:none}
-
-/* row */
-.mat-row-header{
-  display:flex;align-items:center;gap:0;
-  padding:10px 10px;cursor:pointer;
-  transition:background .1s;
-  border-radius:4px;
-}
-.mat-row-header:hover{background:var(--surface2)}
-.mat-state-bar{width:3px;min-height:20px;border-radius:1px;flex-shrink:0;margin-right:10px;background:var(--border)}
-.pendiente .mat-state-bar{background:var(--border)}
-.en-curso .mat-state-bar{background:var(--gold)}
-.aprobada .mat-state-bar{background:var(--green-dark)}
-.desaprobada .mat-state-bar{background:var(--red-dark)}
-.mat-nombre{flex:1;font-size:13.5px;font-weight:500;font-family:'Lora',serif;line-height:1.3;padding-right:8px;color:var(--text)}
-.pendiente .mat-nombre{color:var(--text2)}
-.mat-ch{font-size:12px;color:var(--text3);white-space:nowrap;min-width:36px;text-align:right}
-.mat-nota-inline{
-  font-size:12px;font-weight:700;min-width:28px;text-align:right;
-  padding-left:10px;
-}
-.nota-green{color:var(--green-dark)}
-.nota-yellow{color:var(--gold-bright)}
-.nota-red{color:var(--red-dark)}
-.mat-chevron{font-size:9px;color:var(--text3);padding-left:8px;transition:transform .2s;flex-shrink:0}
-
-.mat-detail{
-  display:none;background:rgba(15,32,64,0.3);
-  border-top:1px solid var(--border);
-  padding:14px 16px 14px 23px;
-  border-radius:0 0 8px 8px;
-}
-.mat-detail.open{display:block}
-
-.cuatri-sep{
-  font-size:10px;font-weight:600;color:var(--text3);
-  text-transform:uppercase;letter-spacing:.1em;
-  padding:12px 10px 4px;
-  border-bottom:1px solid var(--border);
-  background:transparent;
-}
-
-/* ACTIONS */
-.action-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
-.btn{
-  background:none;border:1px solid var(--border);
-  color:var(--text2);font-family:'Inter',sans-serif;
-  font-size:12px;font-weight:500;padding:6px 13px;
-  border-radius:4px;cursor:pointer;
-  transition:all .13s;white-space:nowrap;
-}
-.btn:hover{background:var(--surface2);border-color:var(--text3);color:var(--text)}
-.btn.primary{background:linear-gradient(135deg,#1A4A8A,#2563A8);border-color:rgba(37,99,168,0.5);color:#fff}
-.btn.primary:hover{background:linear-gradient(135deg,#1E5599,#2D6FBF);border-color:#2563A8}
-.btn.success{border-color:rgba(30,138,85,0.5);color:var(--green-dark)}
-.btn.success:hover{background:rgba(30,138,85,0.1);border-color:var(--green-dark)}
-.btn.danger{border-color:rgba(160,48,48,0.5);color:var(--red-dark)}
-.btn.danger:hover{background:rgba(160,48,48,0.1);border-color:var(--red-dark)}
-.btn.small{font-size:11px;padding:4px 10px}
-
-/* EXAMENES */
-.ex-table{width:100%;border-collapse:collapse;margin-top:10px;font-size:12px}
-.ex-table th{text-align:left;font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;padding:0 6px 5px}
-.ex-table td{padding:6px 6px;border-top:1px solid var(--border);vertical-align:middle}
-.ex-tipo{font-weight:600;color:var(--text)}
-.ex-fecha{color:var(--text2)}
-
-/* CORRELATIVAS */
-.corr-list{font-size:12px;color:var(--text2);line-height:1.9}
-.corr-ok{color:var(--green-dark);font-weight:500}
-.corr-pending{color:var(--text3)}
-
-/* FORM ELEMENTS */
-.field-group{margin-bottom:14px}
-.field-label{font-size:11px;font-weight:600;color:var(--text2);margin-bottom:5px;display:block;text-transform:uppercase;letter-spacing:.05em}
-.field-input{
-  background:var(--surface2);border:1px solid var(--border);
-  color:var(--text);font-size:14px;font-family:'Inter',sans-serif;
-  padding:9px 12px;border-radius:4px;
-  width:100%;outline:none;transition:border-color .15s,box-shadow .15s;
-}
-.field-input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,168,.15)}
-.field-input[type=number]{width:100px}
-select.field-input{cursor:pointer}
-.field-input option{background:var(--surface)}
-
-/* MODAL */
-.modal-bg{
-  display:none;position:fixed;inset:0;
-  background:rgba(0,0,0,.7);backdrop-filter:blur(4px);
-  z-index:200;
-  align-items:center;justify-content:center;padding:16px;
-}
-.modal-bg.open{display:flex}
-.modal{
-  background:var(--surface);border:1px solid var(--border);
-  border-top:2px solid var(--gold);
-  border-radius:8px;padding:24px;width:100%;max-width:400px;
-  box-shadow:0 20px 60px rgba(0,0,0,.8);animation:slideUp .18s ease;
-}
-@keyframes slideUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-.modal-title{font-size:16px;font-weight:700;margin-bottom:18px;font-family:'Lora',serif;letter-spacing:-.01em}
-.modal-foot{display:flex;gap:8px;justify-content:flex-end;margin-top:18px;padding-top:14px;border-top:1px solid var(--border)}
-
-/* TOAST */
-.toast{
-  position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(10px);
-  background:var(--surface2);color:var(--text);
-  border:1px solid var(--border);
-  font-size:12px;font-weight:500;padding:9px 16px;
-  border-radius:6px;z-index:300;opacity:0;
-  transition:all .2s;pointer-events:none;white-space:nowrap;
-  box-shadow:0 8px 24px rgba(0,0,0,.6);
-}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-
-/* CONFIG */
-.config-section{
-  border-bottom:1px solid var(--border);
-  padding:24px 0;
-}
-.config-section:first-child{padding-top:0}
-.config-section:last-child{border-bottom:none}
-.config-section-title{
-  font-family:'Lora',serif;font-size:15px;font-weight:700;
-  color:var(--text);margin-bottom:4px;
-}
-.config-section-desc{font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.5}
-.tg-status{
-  display:inline-flex;align-items:center;gap:5px;
-  font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;
-  padding:3px 0;margin-bottom:14px;
-}
-.tg-status-dot{width:6px;height:6px;border-radius:50%}
-.tg-connected .tg-status-dot{background:var(--green-dark)}
-.tg-connected{color:var(--green-dark)}
-.tg-disconnected .tg-status-dot{background:var(--text3)}
-.tg-disconnected{color:var(--text2)}
-.config-btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px}
-.danger-title{color:var(--red-dark)}
-
-/* OTROS REQUISITOS */
-.otros-block{margin-top:36px;margin-bottom:28px}
-.otros-heading{
-  display:flex;align-items:baseline;justify-content:space-between;
-  padding-bottom:8px;
-  border-bottom:1px solid var(--border);
-  margin-bottom:0;
-  position:relative;
-}
-.otros-heading::after{
-  content:'';
-  position:absolute;bottom:-1px;left:0;
-  height:2px;width:40px;
-  background:linear-gradient(90deg,rgba(201,146,26,0.5),transparent);
-}
-.otros-heading-text{
-  font-family:'Lora',serif;font-size:17px;font-weight:700;
-  color:#C8D8F0;letter-spacing:-.01em;
-}
-.otros-heading-sub{font-size:12px;color:var(--text3);font-weight:400}
-
-.req-row{
-  display:flex;align-items:flex-start;gap:0;
-  padding:10px 10px;cursor:pointer;
-  transition:background .1s;border-radius:4px;
-  border-bottom:1px solid rgba(30,45,66,0.7);
-}
-.req-row:last-child{border-bottom:none}
-.req-row:hover{background:var(--surface2)}
-.req-state-bar{width:3px;min-height:20px;border-radius:1px;flex-shrink:0;margin-right:10px;margin-top:2px;background:var(--border)}
-.req-pendiente .req-state-bar{background:var(--border)}
-.req-en-curso .req-state-bar{background:var(--gold)}
-.req-acreditado .req-state-bar{background:var(--green-dark)}
-.req-body{flex:1;min-width:0}
-.req-nombre{font-size:13.5px;font-weight:500;font-family:'Lora',serif;line-height:1.3;color:var(--text)}
-.req-pendiente .req-nombre{color:var(--text2)}
-.req-meta{display:flex;align-items:center;gap:8px;margin-top:3px;flex-wrap:wrap}
-.req-h{font-size:11px;color:var(--text3)}
-.req-cond{font-size:11px;padding:2px 8px;border-radius:10px;font-weight:500}
-.req-cond.ok{background:rgba(37,176,106,0.12);color:var(--green-dark)}
-.req-cond.locked{background:rgba(74,98,128,0.15);color:var(--text3)}
-.req-chevron{font-size:9px;color:var(--text3);padding-left:8px;transition:transform .2s;flex-shrink:0;margin-top:4px}
-
-.req-detail{
-  display:none;background:rgba(15,32,64,0.3);
-  border-top:1px solid var(--border);
-  padding:12px 16px 12px 23px;
-  border-radius:0 0 8px 8px;
-}
-.req-detail.open{display:block}
-.req-cond-full{font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:12px;padding:8px 10px;background:rgba(30,45,66,0.4);border-radius:6px;border-left:2px solid var(--border)}
-
-/* EMPTY */
-.empty{text-align:center;padding:36px 20px;color:var(--text2);font-size:14px}
-.empty-icon{font-size:40px;margin-bottom:8px}
-
-/* ICON BTNS */
-.icon-btn{background:none;border:none;color:var(--text3);cursor:pointer;padding:4px 6px;border-radius:6px;font-size:14px;transition:all .15s}
-.icon-btn:hover{background:var(--surface2);color:var(--text)}
-
-@media(max-width:480px){
-  .prog-row{grid-template-columns:1fr}
-  .hero-promedio{font-size:42px}
-}
-@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Mi Carrera · Analista Programador</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
 
@@ -437,97 +15,111 @@ select.field-input{cursor:pointer}
     <div class="brand-crest">A</div>
     Mi Carrera
   </div>
-  <button class="tab active" onclick="showPage('dashboard',this)">Inicio</button>
-  <button class="tab" onclick="showPage('materias',this)">Materias</button>
-  <button class="tab" onclick="showPage('config',this)">Config</button>
+  <button class="tab active" onclick="showPage('dashboard', this)">Inicio</button>
+  <button class="tab"        onclick="showPage('materias',  this)">Materias</button>
+  <button class="tab"        onclick="showPage('config',    this)">Config</button>
 </header>
 
 <main>
 
-<!-- DASHBOARD -->
-<div class="page active" id="page-dashboard">
-  <div class="hero">
-    <div class="hero-label">Promedio general</div>
-    <div class="hero-promedio" id="hero-promedio">—<small> / 10</small></div>
-    <div class="hero-sub" id="hero-sub">Cargá tu primera materia aprobada</div>
-    <div class="prog-row">
-      <div class="prog-item">
-        <div class="prog-labels"><span>Materias</span><strong id="prog-mat-lbl">0 / 0</strong></div>
-        <div class="prog-track"><div class="prog-fill" id="prog-mat" style="width:0%"></div></div>
+  <!-- ── Dashboard ──────────────────────────────────────────── -->
+  <div class="page active" id="page-dashboard">
+
+    <div class="hero">
+      <div class="hero-label">Promedio general</div>
+      <div class="hero-promedio" id="hero-promedio">—<small> / 10</small></div>
+      <div class="hero-sub"      id="hero-sub">Cargá tu primera materia aprobada</div>
+      <div class="prog-row">
+        <div class="prog-item">
+          <div class="prog-labels"><span>Materias</span><strong id="prog-mat-lbl">0 / 0</strong></div>
+          <div class="prog-track"><div class="prog-fill" id="prog-mat" style="width:0%"></div></div>
+        </div>
+        <div class="prog-item">
+          <div class="prog-labels"><span>Horas</span><strong id="prog-ch-lbl">0h / 0h</strong></div>
+          <div class="prog-track"><div class="prog-fill" id="prog-ch"  style="width:0%"></div></div>
+        </div>
       </div>
-      <div class="prog-item">
-        <div class="prog-labels"><span>Horas</span><strong id="prog-ch-lbl">0h / 0h</strong></div>
-        <div class="prog-track"><div class="prog-fill" id="prog-ch" style="width:0%"></div></div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-num green"  id="s-aprobadas">0</div>
+        <div class="stat-lbl">Aprobadas</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num yellow" id="s-cursando">0</div>
+        <div class="stat-lbl">En curso</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num blue"   id="s-pendientes">0</div>
+        <div class="stat-lbl">Pendientes</div>
       </div>
     </div>
+
+    <div id="proximos-wrap"></div>
+
   </div>
 
-  <div class="stats-grid">
-    <div class="stat-card">
-      <div class="stat-num green" id="s-aprobadas">0</div>
-      <div class="stat-lbl">Aprobadas ✓</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-num yellow" id="s-cursando">0</div>
-      <div class="stat-lbl">En curso</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-num blue" id="s-pendientes">0</div>
-      <div class="stat-lbl">Pendientes</div>
-    </div>
+  <!-- ── Materias ───────────────────────────────────────────── -->
+  <div class="page" id="page-materias">
+    <div id="mat-list"></div>
   </div>
 
-  <div id="proximos-wrap"></div>
-</div>
+  <!-- ── Config ─────────────────────────────────────────────── -->
+  <div class="page" id="page-config">
 
-<!-- MATERIAS -->
-<div class="page" id="page-materias">
-  <div id="mat-list"></div>
-</div>
+    <div class="config-section">
+      <div class="config-section-title">Notificaciones por Telegram</div>
+      <div class="config-section-desc">
+        La aplicación puede enviarte un mensaje el día anterior y el día de cada examen.
+        Requiere un bot propio de Telegram.
+      </div>
+      <div class="tg-status tg-disconnected" id="tg-badge">
+        <span class="tg-status-dot"></span> Sin configurar
+      </div>
+      <div class="field-group">
+        <label class="field-label">Token del bot</label>
+        <input class="field-input" id="tg-token" type="password"
+               placeholder="123456789:AAFxxx..." autocomplete="off">
+      </div>
+      <div class="field-group">
+        <label class="field-label">Chat ID</label>
+        <input class="field-input" id="tg-chatid" placeholder="Número de chat">
+      </div>
+      <div class="config-btns">
+        <button class="btn primary" onclick="saveTG()">Guardar</button>
+        <button class="btn"         onclick="testTG()">Enviar mensaje de prueba</button>
+        <button class="btn danger"  onclick="clearTG()">Borrar credenciales</button>
+      </div>
+    </div>
 
-<!-- CONFIG -->
-<div class="page" id="page-config">
-  <div class="config-section">
-    <div class="config-section-title">Notificaciones por Telegram</div>
-    <div class="config-section-desc">La aplicación puede enviarte un mensaje el día anterior y el día de cada examen. Requiere un bot propio de Telegram.</div>
-    <div class="tg-status tg-disconnected" id="tg-badge">
-      <span class="tg-status-dot"></span> Sin configurar
+    <div class="config-section">
+      <div class="config-section-title">Copia de seguridad</div>
+      <div class="config-section-desc">
+        Exportá tus datos como JSON para hacer backup o transferirlos a otro dispositivo.
+        Al importar, los datos actuales se reemplazan por completo.
+      </div>
+      <div class="config-btns">
+        <button class="btn" onclick="exportData()">Exportar datos</button>
+        <button class="btn" onclick="document.getElementById('imp').click()">Importar datos</button>
+        <input type="file" id="imp" accept=".json" style="display:none" onchange="importData(event)">
+      </div>
     </div>
-    <div class="field-group">
-      <label class="field-label">Token del bot</label>
-      <input class="field-input" id="tg-token" type="password" placeholder="123456789:AAFxxx..." autocomplete="off">
+
+    <div class="config-section">
+      <div class="config-section-title danger-title">Restablecer</div>
+      <div class="config-section-desc">
+        Elimina permanentemente todas las notas, estados y exámenes registrados.
+        Esta acción no se puede deshacer.
+      </div>
+      <button class="btn danger" onclick="confirmReset()">Borrar todos los datos</button>
     </div>
-    <div class="field-group">
-      <label class="field-label">Chat ID</label>
-      <input class="field-input" id="tg-chatid" placeholder="Número de chat">
-    </div>
-    <div class="config-btns">
-      <button class="btn primary" onclick="saveTG()">Guardar</button>
-      <button class="btn" onclick="testTG()">Enviar mensaje de prueba</button>
-      <button class="btn danger" onclick="clearTG()">Borrar credenciales</button>
-    </div>
+
   </div>
-
-  <div class="config-section">
-    <div class="config-section-title">Copia de seguridad</div>
-    <div class="config-section-desc">Exportá tus datos como JSON para hacer backup o para transferirlos a otro dispositivo. Al importar, los datos actuales se reemplazan por completo.</div>
-    <div class="config-btns">
-      <button class="btn" onclick="exportData()">Exportar datos</button>
-      <button class="btn" onclick="document.getElementById('imp').click()">Importar datos</button>
-      <input type="file" id="imp" accept=".json" style="display:none" onchange="importData(event)">
-    </div>
-  </div>
-
-  <div class="config-section">
-    <div class="config-section-title danger-title">Restablecer</div>
-    <div class="config-section-desc">Elimina permanentemente todas las notas, estados y exámenes registrados. Esta acción no se puede deshacer.</div>
-    <button class="btn danger" onclick="confirmReset()">Borrar todos los datos</button>
-  </div>
-</div>
 
 </main>
 
-<!-- MODAL -->
+<!-- ── Modal global ────────────────────────────────────────── -->
 <div class="modal-bg" id="modal-bg" onclick="closeOnBg(event)">
   <div class="modal">
     <div class="modal-title" id="modal-title"></div>
@@ -538,568 +130,19 @@ select.field-input{cursor:pointer}
 
 <div class="toast" id="toast"></div>
 
-<script>
-const PLAN=[
-  {a:1,c:1,n:"Preliminares de Matemática",h:60,r:[]},
-  {a:1,c:1,n:"Álgebra",h:112,r:["Preliminares de Matemática"]},
-  {a:1,c:1,n:"Análisis Matemático I - a",h:80,r:["Preliminares de Matemática"]},
-  {a:1,c:1,n:"Introducción a la Informática",h:96,r:[]},
-  {a:1,c:2,n:"Análisis Matemático I - b",h:64,r:["Análisis Matemático I - a"]},
-  {a:1,c:2,n:"Matemática Discreta",h:88,r:["Álgebra","Análisis Matemático I - a"]},
-  {a:1,c:2,n:"Programación Procedural",h:120,r:["Introducción a la Informática"]},
-  {a:2,c:1,n:"Diseño de Interfaces de Usuario",h:80,r:["Programación Procedural"]},
-  {a:2,c:1,n:"Estructuras de Datos y Algoritmos",h:96,r:["Matemática Discreta","Programación Procedural"]},
-  {a:2,c:1,n:"Sistemas y Organizaciones",h:120,r:["Introducción a la Informática"]},
-  {a:2,c:2,n:"Análisis y Diseño de Sistemas I",h:96,r:["Estructuras de Datos y Algoritmos","Sistemas y Organizaciones"]},
-  {a:2,c:2,n:"Arquitectura de Computadoras",h:96,r:["Estructuras de Datos y Algoritmos"]},
-  {a:2,c:2,n:"Laboratorio de Inteligencia Artificial",h:64,r:["Estructuras de Datos y Algoritmos","Sistemas y Organizaciones"]},
-  {a:2,c:2,n:"Probabilidad y Estadística",h:88,r:["Álgebra","Análisis Matemático I - b"]},
-  {a:3,c:1,n:"Base de Datos I",h:96,r:["Análisis y Diseño de Sistemas I"]},
-  {a:3,c:1,n:"Introducción a Redes y Comunicaciones",h:96,r:["Arquitectura de Computadoras"]},
-  {a:3,c:1,n:"Programación Orientada a Objetos",h:88,r:["Análisis y Diseño de Sistemas I"]},
-  {a:3,c:1,n:"Sistemas Operativos",h:112,r:["Arquitectura de Computadoras"]},
-  {a:3,c:2,n:"Análisis y Diseño de Sistemas II",h:96,r:["Base de Datos I","Programación Orientada a Objetos"]},
-  {a:3,c:2,n:"Laboratorio de Redes y Comunicaciones",h:96,r:["Introducción a Redes y Comunicaciones","Sistemas Operativos"]},
-  {a:3,c:2,n:"Laboratorio Orientado a Aplicaciones Móviles",h:96,r:["Base de Datos I","Programación Orientada a Objetos"]},
-  {a:3,c:2,n:"Programación Orientada a la Web",h:104,r:["Base de Datos I","Programación Orientada a Objetos"]},
-  {a:4,c:1,n:"Base de Datos II",h:96,r:["Base de Datos I"]},
-  {a:4,c:1,n:"Ingeniería de Software I",h:96,r:["Análisis y Diseño de Sistemas II"]},
-  {a:4,c:1,n:"Inteligencia Artificial",h:96,r:["Probabilidad y Estadística","Laboratorio de Inteligencia Artificial"]},
-  {a:4,c:1,n:"Seguridad Informática",h:80,r:["Sistemas Operativos"]},
-  {a:4,c:2,n:"Ingeniería de Software II",h:96,r:["Ingeniería de Software I"]},
-  {a:4,c:2,n:"Proyecto Final I",h:96,r:["Ingeniería de Software I"]},
-  {a:4,c:2,n:"Tecnologías Emergentes",h:64,r:[]},
-  {a:4,c:2,n:"Proyecto Final II",h:96,r:["Proyecto Final I"]},
-  // Inglés — tratados como materias regulares (tienen nota y afectan promedio)
-  {a:1,c:1,n:"Inglés I",h:70,r:[]},
-  {a:2,c:1,n:"Inglés II",h:100,r:["Inglés I"]},
-  {a:3,c:1,n:"Inglés III",h:80,r:["Inglés II"]},
-];
-const TOTAL_H=PLAN.reduce((s,m)=>s+m.h,0);
-const TOTAL_M=PLAN.length;
+<!--
+  Orden de carga importante:
+  1. plan.js    → datos (PLAN, OTROS, TOTAL_H, TOTAL_M)
+  2. state.js   → estado y persistencia (depende de PLAN)
+  3. render.js  → DOM (depende de state + plan)
+  4. actions.js → lógica (depende de render + state + plan)
+  5. app.js     → init, nav, utils (depende de todo lo anterior)
+-->
+<script src="js/plan.js"></script>
+<script src="js/state.js"></script>
+<script src="js/render.js"></script>
+<script src="js/actions.js"></script>
+<script src="js/app.js"></script>
 
-const OTROS=[
-  {id:'pc',n:'Prácticas Comunitarias',h:40,
-    cond:'Requiere el 40% de la carrera aprobada.',
-    unlock:()=>{const s=stats();return s.ap/TOTAL_M>=0.40},
-    lockMsg:()=>{const s=stats();return`Necesitás ${Math.ceil(TOTAL_M*0.40)} materias aprobadas (tenés ${s.ap}).`},
-    readyMsg:'Superaste el 40% de la carrera ✓'},
-  {id:'eps',n:'Experiencia Profesional Supervisada',h:70,
-    cond:'Requiere el 70% de la carrera aprobada.',
-    unlock:()=>{const s=stats();return s.ap/TOTAL_M>=0.70},
-    lockMsg:()=>{const s=stats();return`Necesitás ${Math.ceil(TOTAL_M*0.70)} materias aprobadas (tenés ${s.ap}).`},
-    readyMsg:'Superaste el 70% de la carrera ✓'},
-];
-function stateOtro(id){return state['_otro_'+id]||'pendiente'}
-function setOtro(id,e){state['_otro_'+id]=e;saveState()}
-
-let state=loadState();
-function loadState(){try{return JSON.parse(localStorage.getItem('ap2_state')||'{}')}catch{return{}}}
-function saveState(){localStorage.setItem('ap2_state',JSON.stringify(state))}
-function ms(n){return state[n]||{e:'pendiente',nota:null,exs:[]}}
-function setMs(n,d){state[n]={...ms(n),...d};saveState()}
-
-function stats(){
-  let ap=0,cur=0,suma=0,hAp=0;
-  PLAN.forEach(m=>{
-    const s=ms(m.n);
-    if(s.e==='aprobada'){ap++;hAp+=m.h;if(s.nota)suma+=s.nota}
-    if(s.e==='en-curso')cur++;
-  });
-  return{ap,cur,pen:TOTAL_M-ap-cur,prom:ap>0?(suma/ap):null,hAp};
-}
-
-function renderDash(){
-  const s=stats();
-  const pEl=document.getElementById('hero-promedio');
-  if(s.prom!==null){
-    pEl.innerHTML=s.prom.toFixed(2)+'<small> / 10</small>';
-    const sub=document.getElementById('hero-sub');
-    sub.textContent=s.ap===1?'1 materia aprobada':s.ap+' materias aprobadas';
-  }else{
-    pEl.innerHTML='—<small> / 10</small>';
-    document.getElementById('hero-sub').textContent='Cargá tu primera materia aprobada';
-  }
-  const pm=(s.ap/TOTAL_M*100).toFixed(1);
-  const ph=(s.hAp/TOTAL_H*100).toFixed(1);
-  document.getElementById('prog-mat').style.width=pm+'%';
-  document.getElementById('prog-ch').style.width=ph+'%';
-  document.getElementById('prog-mat-lbl').textContent=s.ap+' / '+TOTAL_M;
-  document.getElementById('prog-ch-lbl').textContent=s.hAp+'h / '+TOTAL_H+'h';
-  document.getElementById('s-aprobadas').textContent=s.ap;
-  document.getElementById('s-cursando').textContent=s.cur;
-  document.getElementById('s-pendientes').textContent=s.pen;
-  renderProximos();
-}
-
-function renderProximos(){
-  const hoy=new Date();hoy.setHours(0,0,0,0);
-  const list=[];
-  PLAN.forEach(m=>{
-    const s=ms(m.n);
-    (s.exs||[]).forEach(ex=>{
-      if(!ex.fecha||ex.nota)return;
-      const f=new Date(ex.fecha+'T00:00:00');
-      const d=Math.round((f-hoy)/86400000);
-      if(d>=-1&&d<=30)list.push({nombre:m.n,tipo:ex.tipo,fecha:ex.fecha,d});
-    });
-  });
-  list.sort((a,b)=>a.d-b.d);
-  const wrap=document.getElementById('proximos-wrap');
-  if(!list.length){wrap.innerHTML='';return}
-  wrap.innerHTML='<div class="section-title">Próximos exámenes</div>'+
-    list.map(p=>{
-      const icon=p.d<=0?'today':p.d<=5?'near':'far';
-      const badge=p.d<0?'past':p.d===0?'today':p.d<=5?'soon':'far';
-      const lbl=p.d<0?`hace ${Math.abs(p.d)}d`:p.d===0?'Hoy':`en ${p.d}d`;
-      const emoji=p.tipo.includes('Final')?'🎓':'📝';
-      return`<div class="exam-card">
-        <div class="exam-icon ${icon}">${emoji}</div>
-        <div class="exam-info">
-          <div class="exam-name">${p.nombre}</div>
-          <div class="exam-sub">${p.tipo} · ${fmt(p.fecha)}</div>
-        </div>
-        <span class="exam-badge badge-${badge}">${lbl}</span>
-      </div>`;
-    }).join('');
-}
-
-function renderMats(){
-  const años=[1,2,3,4];
-  const ingles=PLAN.filter(m=>m.n.startsWith('Inglés'));
-  const ingAp=ingles.filter(m=>ms(m.n).e==='aprobada').length;
-  const ingRows=ingles.map(m=>matRow(m)).join('');
-
-  const yearBlocks=años.map(a=>{
-    const mats=PLAN.filter(m=>m.a===a&&!m.n.startsWith('Inglés'));
-    const ap=mats.filter(m=>ms(m.n).e==='aprobada').length;
-    const rows=[1,2].map(c=>{
-      const cm=mats.filter(m=>m.c===c);
-      if(!cm.length)return'';
-      return`<tr><td colspan="4" class="cuatri-sep">${c===1?'Primer':'Segundo'} Cuatrimestre</td></tr>`
-        +cm.map(m=>matRow(m)).join('');
-    }).join('');
-    return`<div class="year-block">
-      <div class="year-heading" onclick="toggleYear(${a})">
-        <span class="year-name-text">${['Primer','Segundo','Tercer','Cuarto'][a-1]} Año</span>
-        <span class="year-prog-mini">${ap} de ${mats.length} aprobadas</span>
-      </div>
-      <div class="year-table-wrap${a===1?' open':''}" id="yb-${a}">
-        <table class="mat-table">
-          <thead><tr>
-            <th style="padding-left:23px">Materia</th>
-            <th style="text-align:right">Hs.</th>
-            <th style="text-align:right">Nota</th>
-            <th style="width:16px"></th>
-          </tr></thead>
-          <tbody id="tbody-${a}">${rows}</tbody>
-        </table>
-      </div>
-    </div>`;
-  }).join('');
-
-  const idiomasBlock=`<div class="year-block">
-    <div class="year-heading" onclick="toggleYear('ing')">
-      <span class="year-name-text">Idiomas</span>
-      <span class="year-prog-mini">${ingAp} de ${ingles.length} aprobadas</span>
-    </div>
-    <div class="year-table-wrap" id="yb-ing">
-      <table class="mat-table">
-        <thead><tr>
-          <th style="padding-left:23px">Materia</th>
-          <th style="text-align:right">Hs.</th>
-          <th style="text-align:right">Nota</th>
-          <th style="width:16px"></th>
-        </tr></thead>
-        <tbody>${ingRows}</tbody>
-      </table>
-    </div>
-  </div>`;
-
-  document.getElementById('mat-list').innerHTML=yearBlocks+idiomasBlock+renderOtros();
-}
-
-function renderOtros(){
-  const items=OTROS.map(r=>{
-    const e=stateOtro(r.id);
-    const unlocked=r.unlock();
-    const lockTxt=typeof r.lockMsg==='function'?r.lockMsg():r.lockMsg;
-    const condLabel=e==='acreditado'
-      ?`<span class="req-cond ok">Acreditado ✓</span>`
-      :unlocked
-        ?`<span class="req-cond ok">${r.readyMsg}</span>`
-        :`<span class="req-cond locked">🔒 ${lockTxt}</span>`;
-    const acts=e==='pendiente'
-      ?(unlocked
-        ?`<button class="btn primary" onclick="activarOtro('${r.id}')">▶ Iniciar</button>`
-        :`<button class="btn" disabled style="opacity:.45;cursor:not-allowed">🔒 Bloqueado</button>
-           <div style="font-size:11px;color:var(--text3);margin-top:6px">${lockTxt}</div>`)
-      :e==='en-curso'
-        ?`<button class="btn success" onclick="acreditarOtro('${r.id}')">✓ Acreditar</button>
-           <button class="btn small" onclick="revertirOtro('${r.id}')">Desactivar</button>`
-        :`<button class="btn small danger" onclick="revertirOtro('${r.id}')">Revertir</button>`;
-    return`<div class="req-${e}" id="req-${r.id}">
-      <div class="req-row" onclick="toggleReq('${r.id}')">
-        <div class="req-state-bar"></div>
-        <div class="req-body">
-          <div class="req-nombre">${r.n}</div>
-          <div class="req-meta">
-            <span class="req-h">${r.h}h</span>
-            ${condLabel}
-          </div>
-        </div>
-        <span class="req-chevron" id="reqch-${r.id}">▼</span>
-      </div>
-      <div class="req-detail" id="reqb-${r.id}">
-        <div class="req-cond-full">${r.cond}</div>
-        <div class="action-row">${acts}</div>
-      </div>
-    </div>`;
-  }).join('');
-  return`<div class="otros-block">
-    <div class="otros-heading">
-      <span class="otros-heading-text">Otros Requisitos</span>
-      <span class="otros-heading-sub">${OTROS.filter(r=>stateOtro(r.id)==='acreditado').length} de ${OTROS.length} acreditados</span>
-    </div>
-    <div style="background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 12px 12px;">${items}</div>
-  </div>`;
-}
-
-function refreshOtros(){
-  const wrap=document.getElementById('mat-list');
-  const existing=document.querySelector('.otros-block');
-  if(existing)existing.outerHTML=renderOtros(); // won't work with querySelector, use below
-  // Re-render whole otros section by finding it
-  const allBlocks=document.querySelectorAll('.otros-block');
-  if(allBlocks.length){
-    const tmp=document.createElement('div');
-    tmp.innerHTML=renderOtros();
-    allBlocks[0].replaceWith(tmp.firstElementChild);
-  }
-}
-
-function activarOtro(id){
-  const r=OTROS.find(x=>x.id===id);
-  if(r&&!r.unlock()){
-    const msg=typeof r.lockMsg==='function'?r.lockMsg():r.lockMsg;
-    toast('🔒 '+msg);return;
-  }
-  setOtro(id,'en-curso');refreshOtros();toast('Iniciado 🚀');
-}
-function acreditarOtro(id){setOtro(id,'acreditado');refreshOtros();toast('¡Acreditado! 🎉')}
-function revertirOtro(id){setOtro(id,'pendiente');refreshOtros();toast('Revertido a pendiente')}
-
-function toggleReq(id){
-  const b=document.getElementById('reqb-'+id);
-  b.classList.toggle('open');
-  const ch=document.getElementById('reqch-'+id);
-  if(ch)ch.style.transform=b.classList.contains('open')?'rotate(180deg)':'';
-}
-
-function matRow(m){
-  const s=ms(m.n);
-  const notaHTML=s.nota?`<span class="mat-nota-inline ${notaCls(s.nota)}">${s.nota}</span>`:'';
-  return`<tr class="${s.e}" id="mc-${eid(m.n)}">
-    <td colspan="4" style="padding:0">
-      <div class="mat-row-header" onclick="toggleMat('${esc(m.n)}')">
-        <div class="mat-state-bar"></div>
-        <span class="mat-nombre">${m.n}</span>
-        <span class="mat-ch">${m.h}h</span>
-        ${notaHTML}
-        <span class="mat-chevron" id="mch-${eid(m.n)}">▼</span>
-      </div>
-      <div class="mat-detail" id="mb-${eid(m.n)}">${matBody(m,s)}</div>
-    </td>
-  </tr>`;
-}
-
-function matBody(m,s){
-  const corrHTML=m.r.length
-    ?m.r.map(c=>{const ok=ms(c).e==='aprobada';return`<div class="${ok?'corr-ok':'corr-pending'}">${ok?'✓':'○'} ${c}</div>`}).join('')
-    :'<div style="color:var(--text3)">Sin correlativas</div>';
-
-  const exHTML=(s.exs||[]).length?`
-    <table class="ex-table">
-      <thead><tr><th>Examen</th><th>Fecha</th><th>Nota</th><th></th></tr></thead>
-      <tbody>${(s.exs||[]).map((ex,i)=>{
-        const hoy=new Date();hoy.setHours(0,0,0,0);
-        const f=ex.fecha?new Date(ex.fecha+'T00:00:00'):null;
-        const d=f?Math.round((f-hoy)/86400000):null;
-        const badge=d!==null&&!ex.nota?`<span class="exam-badge badge-${d<=0?'past':d<=5?'soon':'far'}" style="font-size:10px;padding:2px 7px">${d===0?'Hoy':d<0?`hace ${Math.abs(d)}d`:`en ${d}d`}</span>`:'';
-        const notaCell=ex.nota?`<span class="mat-nota ${notaCls(ex.nota)}">${ex.nota}</span>`:`<button class="btn small" onclick="notaEx('${esc(m.n)}',${i})">+ Nota</button>`;
-        return`<tr>
-          <td class="ex-tipo">${ex.tipo}</td>
-          <td class="ex-fecha">${ex.fecha?fmt(ex.fecha):'—'} ${badge}</td>
-          <td>${notaCell}</td>
-          <td><button class="icon-btn" onclick="delEx('${esc(m.n)}',${i})">✕</button></td>
-        </tr>`;
-      }).join('')}</tbody>
-    </table>`:'';
-
-  const bloqueo=bloqueoActivar(m.n);
-  const acts={
-    'pendiente':bloqueo
-      ?`<button class="btn" disabled style="opacity:.45;cursor:not-allowed" title="${bloqueo}">🔒 Bloqueada</button>
-         <div style="font-size:11px;color:var(--text3);margin-top:6px">${bloqueo}</div>`
-      :`<button class="btn primary" onclick="activar('${esc(m.n)}')">▶ Activar</button>`,
-    'en-curso':`
-      <button class="btn" onclick="addEx('${esc(m.n)}')">+ Agregar examen</button>
-      <button class="btn success" onclick="aprobar('${esc(m.n)}')">✓ Aprobar</button>
-      <button class="btn danger" onclick="desaprobar('${esc(m.n)}')">✗ Desaprobar</button>
-      <button class="btn small" onclick="revertir('${esc(m.n)}')">Desactivar</button>`,
-    'aprobada':`<button class="btn small danger" onclick="revertir('${esc(m.n)}')">Revertir</button>`,
-    'desaprobada':bloqueo
-      ?`<button class="btn" disabled style="opacity:.45;cursor:not-allowed">🔒 Bloqueada</button>
-         <div style="font-size:11px;color:var(--text3);margin-top:6px">${bloqueo}</div>`
-      :`<button class="btn primary" onclick="activar('${esc(m.n)}')">↺ Reintentar</button>`,
-  };
-  return`<div class="action-row">${acts[s.e]||''}</div>
-    ${exHTML}
-    <div style="margin-top:12px">
-      <div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Correlativas</div>
-      <div class="corr-list">${corrHTML}</div>
-    </div>`;
-}
-
-function refreshMat(n){
-  const m=PLAN.find(x=>x.n===n);if(!m)return;
-  const s=ms(n);
-  const row=document.getElementById('mc-'+eid(n));if(!row)return;
-  row.className=s.e;
-  const open=document.getElementById('mb-'+eid(n))?.classList.contains('open');
-  const notaHTML=s.nota?`<span class="mat-nota-inline ${notaCls(s.nota)}">${s.nota}</span>`:'';
-  row.innerHTML=`<td colspan="4" style="padding:0">
-    <div class="mat-row-header" onclick="toggleMat('${esc(n)}')">
-      <div class="mat-state-bar"></div>
-      <span class="mat-nombre">${m.n}</span>
-      <span class="mat-ch">${m.h}h</span>
-      ${notaHTML}
-      <span class="mat-chevron" id="mch-${eid(n)}"${open?' style="transform:rotate(180deg)"':''}>▼</span>
-    </div>
-    <div class="mat-detail${open?' open':''}" id="mb-${eid(n)}">${matBody(m,s)}</div>
-  </td>`;
-}
-
-// Devuelve string con el motivo de bloqueo, o null si está habilitada
-function bloqueoActivar(n){
-  const m=PLAN.find(x=>x.n===n);
-  if(!m)return null;
-  // Correlativas sin aprobar
-  const corrFaltante=m.r.find(c=>ms(c).e!=='aprobada');
-  if(corrFaltante)return`Correlativa pendiente: ${corrFaltante}`;
-  // Inglés I → bloquea 2do cuatri 2do año
-  if(m.a===2&&m.c===2&&!m.n.startsWith('Inglés')){
-    if(ms('Inglés I').e!=='aprobada')return'Requiere Inglés I aprobado (condición para cursar el 2º cuatrimestre de 2º año).';
-  }
-  // Inglés II → bloquea 1er cuatri 3er año
-  if(m.a===3&&m.c===1&&!m.n.startsWith('Inglés')){
-    if(ms('Inglés II').e!=='aprobada')return'Requiere Inglés II aprobado (condición para cursar el 1º cuatrimestre de 3º año).';
-  }
-  // Inglés III → bloquea 2do cuatri 3er año
-  if(m.a===3&&m.c===2&&!m.n.startsWith('Inglés')){
-    if(ms('Inglés III').e!=='aprobada')return'Requiere Inglés III aprobado (condición para cursar el 2º cuatrimestre de 3º año).';
-  }
-  // Inglés II requiere Inglés I aprobado para poder cursarse
-  if(m.n==='Inglés II'&&ms('Inglés I').e!=='aprobada')return'Requiere Inglés I aprobado.';
-  // Inglés III requiere Inglés II aprobado
-  if(m.n==='Inglés III'&&ms('Inglés II').e!=='aprobada')return'Requiere Inglés II aprobado.';
-  return null;
-}
-
-function activar(n){
-  const bloqueo=bloqueoActivar(n);
-  if(bloqueo){toast('🔒 '+bloqueo);return}
-  setMs(n,{e:'en-curso'});refreshMat(n);renderDash();toast(n+' activada 🚀');
-}
-function revertir(n){setMs(n,{e:'pendiente',nota:null,exs:[]});refreshMat(n);renderDash();toast('Revertida a pendiente')}
-function desaprobar(n){setMs(n,{e:'desaprobada',nota:null});refreshMat(n);renderDash();toast('Marcada como desaprobada')}
-
-function aprobar(n){
-  openModal('Aprobar materia',`
-    <div class="field-group">
-      <label class="field-label">Nota final (4 a 10)</label>
-      <input class="field-input" type="number" id="ni" min="4" max="10" step="0.25" placeholder="ej: 7">
-    </div>`,[
-    {l:'Cancelar',c:'btn',f:closeModal},
-    {l:'✓ Aprobar',c:'btn primary',f:()=>{
-      const v=parseFloat(document.getElementById('ni').value);
-      if(!v||v<4||v>10){toast('Nota inválida');return}
-      setMs(n,{e:'aprobada',nota:v});closeModal();refreshMat(n);renderDash();
-      toast('¡'+n+' aprobada con '+v+'! 🎉');
-    }}
-  ]);
-  setTimeout(()=>document.getElementById('ni')?.focus(),120);
-}
-
-function addEx(n){
-  openModal('Agregar examen',`
-    <div class="field-group">
-      <label class="field-label">Tipo de examen</label>
-      <select class="field-input" id="et">
-        <option>Parcial 1</option><option>Parcial 2</option>
-        <option>Recuperatorio 1</option><option>Recuperatorio 2</option>
-        <option>Final</option>
-      </select>
-    </div>
-    <div class="field-group">
-      <label class="field-label">Fecha</label>
-      <input class="field-input" type="date" id="ef">
-    </div>`,[
-    {l:'Cancelar',c:'btn',f:closeModal},
-    {l:'Agregar',c:'btn primary',f:()=>{
-      const t=document.getElementById('et').value;
-      const f=document.getElementById('ef').value;
-      const s=ms(n);
-      setMs(n,{exs:[...(s.exs||[]),{tipo:t,fecha:f,nota:null}]});
-      closeModal();refreshMat(n);renderDash();toast('Examen agregado 📅');
-    }}
-  ]);
-}
-
-function notaEx(n,i){
-  openModal('Nota del examen',`
-    <div class="field-group">
-      <label class="field-label">Nota (1 a 10)</label>
-      <input class="field-input" type="number" id="nei" min="1" max="10" step="0.25" placeholder="ej: 6">
-    </div>`,[
-    {l:'Cancelar',c:'btn',f:closeModal},
-    {l:'Guardar',c:'btn primary',f:()=>{
-      const v=parseFloat(document.getElementById('nei').value);
-      if(!v||v<1||v>10){toast('Nota inválida');return}
-      const s=ms(n);s.exs[i].nota=v;setMs(n,{exs:s.exs});
-      closeModal();refreshMat(n);toast('Nota guardada');
-    }}
-  ]);
-  setTimeout(()=>document.getElementById('nei')?.focus(),120);
-}
-
-function delEx(n,i){
-  const s=ms(n);s.exs.splice(i,1);setMs(n,{exs:s.exs});refreshMat(n);renderDash();toast('Examen eliminado');
-}
-
-function saveTG(){
-  const t=document.getElementById('tg-token').value.trim();
-  const c=document.getElementById('tg-chatid').value.trim();
-  localStorage.setItem('ap2_tgt',t);localStorage.setItem('ap2_tgc',c);
-  updTGBadge();toast('Guardado');
-}
-function clearTG(){
-  localStorage.removeItem('ap2_tgt');localStorage.removeItem('ap2_tgc');
-  document.getElementById('tg-token').value='';
-  document.getElementById('tg-chatid').value='';
-  updTGBadge();toast('Telegram limpiado');
-}
-function updTGBadge(){
-  const ok=localStorage.getItem('ap2_tgt')&&localStorage.getItem('ap2_tgc');
-  const b=document.getElementById('tg-badge');
-  if(ok){b.className='tg-status tg-connected';b.innerHTML='<span class="tg-status-dot"></span> Conectado'}
-  else{b.className='tg-status tg-disconnected';b.innerHTML='<span class="tg-status-dot"></span> Sin configurar'}
-}
-async function testTG(){
-  const t=localStorage.getItem('ap2_tgt'),c=localStorage.getItem('ap2_tgc');
-  if(!t||!c){toast('Configurá token y chat ID primero');return}
-  try{
-    const r=await fetch(`https://api.telegram.org/bot${t}/sendMessage`,{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({chat_id:c,text:'✅ Todo funcionando! Tu tracker de la carrera está conectado.'})
-    });
-    const d=await r.json();
-    d.ok?toast('Mensaje enviado ✅'):toast('Error: '+d.description);
-  }catch{toast('No se pudo conectar')}
-}
-async function sendTG(txt){
-  const t=localStorage.getItem('ap2_tgt'),c=localStorage.getItem('ap2_tgc');
-  if(!t||!c)return;
-  fetch(`https://api.telegram.org/bot${t}/sendMessage`,{
-    method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({chat_id:c,text:txt})
-  }).catch(()=>{});
-}
-
-function exportData(){
-  const b=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(b);
-  a.download='mi_carrera_backup_'+new Date().toISOString().slice(0,10)+'.json';
-  a.click();toast('Backup exportado');
-}
-function importData(e){
-  const f=e.target.files[0];if(!f)return;
-  const r=new FileReader();
-  r.onload=ev=>{try{state=JSON.parse(ev.target.result);saveState();renderDash();renderMats();toast('Datos importados ✅')}catch{toast('Archivo inválido')}};
-  r.readAsText(f);e.target.value='';
-}
-function confirmReset(){
-  openModal('⚠️ Borrar todo',`<p style="color:var(--text2);font-size:14px">Esto elimina todas tus notas, estados y exámenes. No se puede deshacer.</p>`,[
-    {l:'Cancelar',c:'btn',f:closeModal},
-    {l:'Sí, borrar todo',c:'btn danger',f:()=>{state={};saveState();closeModal();renderDash();renderMats();toast('Datos borrados')}}
-  ]);
-}
-
-function openModal(title,body,actions){
-  document.getElementById('modal-title').textContent=title;
-  document.getElementById('modal-body').innerHTML=body;
-  const foot=document.getElementById('modal-foot');foot.innerHTML='';
-  actions.forEach(a=>{const b=document.createElement('button');b.className=a.c;b.textContent=a.l;b.onclick=a.f;foot.appendChild(b)});
-  document.getElementById('modal-bg').classList.add('open');
-}
-function closeModal(){document.getElementById('modal-bg').classList.remove('open')}
-function closeOnBg(e){if(e.target===document.getElementById('modal-bg'))closeModal()}
-
-let tt;
-function toast(msg){
-  const el=document.getElementById('toast');
-  el.textContent=msg;el.className='toast show';
-  clearTimeout(tt);tt=setTimeout(()=>el.classList.remove('show'),2500);
-}
-
-function showPage(id,btn){
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
-  document.getElementById('page-'+id).classList.add('active');
-  btn.classList.add('active');
-}
-
-function toggleYear(a){
-  document.getElementById('yb-'+a)?.classList.toggle('open');
-}
-function toggleMat(n){
-  const b=document.getElementById('mb-'+eid(n));
-  b.classList.toggle('open');
-  const ch=document.getElementById('mch-'+eid(n));
-  if(ch)ch.style.transform=b.classList.contains('open')?'rotate(180deg)':'';
-}
-
-function checkRecords(){
-  const hoy=new Date();hoy.setHours(0,0,0,0);
-  const key='ap2_last_chk';
-  const today=hoy.toISOString().slice(0,10);
-  if(localStorage.getItem(key)===today)return;
-  localStorage.setItem(key,today);
-  PLAN.forEach(m=>{
-    const s=ms(m.n);
-    (s.exs||[]).forEach(ex=>{
-      if(!ex.fecha||ex.nota)return;
-      const f=new Date(ex.fecha+'T00:00:00');
-      const d=Math.round((f-hoy)/86400000);
-      if(d===0)sendTG('📝 Hoy tenés '+ex.tipo+' de '+m.n+'! Mucho ánimo 💪');
-      if(d===1)sendTG('📅 Mañana tenés '+ex.tipo+' de '+m.n+'. ¡A repasar!');
-    });
-  });
-}
-
-function eid(s){return s.replace(/[^a-zA-Z0-9]/g,'_')}
-function esc(s){return s.replace(/'/g,"\\'")}
-function fmt(iso){if(!iso)return'';const[y,m,d]=iso.split('-');return`${d}/${m}/${y}`}
-function notaCls(n){return n>=7?'nota-green':n>=4?'nota-yellow':'nota-red'}
-
-function init(){
-  renderDash();renderMats();
-  const t=localStorage.getItem('ap2_tgt'),c=localStorage.getItem('ap2_tgc');
-  if(t)document.getElementById('tg-token').value=t;
-  if(c)document.getElementById('tg-chatid').value=c;
-  updTGBadge();checkRecords();
-}
-init();
-</script>
 </body>
 </html>
