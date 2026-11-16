@@ -1,117 +1,63 @@
-/**
- * state.js
- * Toda la lógica de persistencia y acceso al estado de la app.
- * Nada aquí toca el DOM. Nada de render.js toca localStorage directamente.
- *
- * Estructura de state[nombreMateria]:
- *   e    → 'pendiente' | 'en-curso' | 'aprobada' | 'desaprobada'
- *   nota → number | null
- *   exs  → [{ tipo, fecha, nota }]
- *
- * Otros requisitos se guardan como state['_otro_<id>']:
- *   valor → 'pendiente' | 'en-curso' | 'acreditado'
- */
-
-const STORAGE_KEY = 'ap2_state';
-
-// Estado global en memoria — se hidrata desde localStorage al init
-let state = _loadFromStorage();
-
-function _loadFromStorage() {
+import { normalizeState, applyCommand } from './core.js';
+export const STORAGE_KEY = 'ap2_state';
+let current = {};
+let readError = '';
+const listeners = new Set();
+export const getState = () => current;
+export const getReadError = () => readError;
+export const subscribe = fn => { listeners.add(fn); return () => listeners.delete(fn); };
+const emit = () => listeners.forEach(fn => fn());
+export function backup(raw = localStorage.getItem(STORAGE_KEY) || '{}', reason = 'manual') {
+  const key = `ap2_backup_${Date.now()}_${crypto.randomUUID()}_${reason}`;
+  localStorage.setItem(key, raw);
+  return key;
+}
+export function readLocal() {
   try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-  } catch {
-    return {};
-  }
-}
-
-function saveState() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-}
-
-// ── Materias ──────────────────────────────────────────────────
-
-/** Devuelve el estado de una materia (con defaults si no existe). */
-function ms(nombre) {
-  return state[nombre] || { e: 'pendiente', nota: null, exs: [] };
-}
-
-/** Actualiza parcialmente el estado de una materia y persiste. */
-function setMs(nombre, datos) {
-  state[nombre] = { ...ms(nombre), ...datos };
-  saveState();
-}
-
-// ── Otros requisitos ──────────────────────────────────────────
-
-function stateOtro(id) {
-  return state['_otro_' + id] || 'pendiente';
-}
-
-function setOtro(id, estado) {
-  state['_otro_' + id] = estado;
-  saveState();
-}
-
-// ── Estadísticas globales ─────────────────────────────────────
-
-/**
- * Calcula stats sobre las materias del PLAN principal (excluye _otro_).
- * Retorna: { ap, cur, pen, prom, hAp }
- */
-function stats() {
-  let ap = 0, cur = 0, sumaNotas = 0, hAp = 0;
-
-  PLAN.forEach(m => {
-    const s = ms(m.n);
-    if (s.e === 'aprobada') {
-      ap++;
-      hAp += m.h;
-      if (s.nota) sumaNotas += s.nota;
+    const raw = localStorage.getItem(STORAGE_KEY);
+    const parsed = raw === null ? {} : JSON.parse(raw);
+    const next = normalizeState(parsed);
+    if (JSON.stringify(next) !== JSON.stringify(parsed)) {
+      backup(raw, 'pre_migration_v2');
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
     }
-    if (s.e === 'en-curso') cur++;
-  });
-
-  return {
-    ap,
-    cur,
-    pen: TOTAL_M - ap - cur,
-    prom: ap > 0 ? sumaNotas / ap : null,
-    hAp,
+    current = next;
+    readError = '';
+  } catch (err) { readError = 'No se pudo leer o migrar el estado. Los datos originales siguen intactos. Exportá una copia para revisarlos. ' + err.message; }
+  emit();
+}
+export async function dispatch(cmd) {
+  if (readError) throw new Error('La escritura está protegida por un error de lectura. Exportá los datos originales.');
+  const write = () => {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    const latest = normalizeState(JSON.parse(raw || '{}'));
+    const next = applyCommand(latest,cmd);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    current = next; emit();
   };
+  if (navigator.locks) return navigator.locks.request('ap2-state-write',write);
+  return write();
 }
-
-// ── Import / Export ───────────────────────────────────────────
-
-function exportData() {
-  const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'mi_carrera_backup_' + new Date().toISOString().slice(0, 10) + '.json';
-  a.click();
-  toast('Backup exportado');
-}
-
-function importData(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = ev => {
-    try {
-      state = JSON.parse(ev.target.result);
-      saveState();
-      renderDash();
-      renderMats();
-      toast('Datos importados');
-    } catch {
-      toast('Archivo inválido');
-    }
+export async function replaceLocal(data) {
+  const next = normalizeState(data, true);
+  const write = () => {
+    backup(undefined,'pre_import');
+    localStorage.setItem(STORAGE_KEY,JSON.stringify(next));
+    current = next; readError = ''; emit();
   };
-  reader.readAsText(file);
-  event.target.value = '';
+  if (navigator.locks) return navigator.locks.request('ap2-state-write',write);
+  return write();
 }
-
-function resetState() {
-  state = {};
-  saveState();
+export function downloadJSON(raw, name) {
+  const url = URL.createObjectURL(new Blob([raw],{type:'application/json'}));
+  const a = document.createElement('a'); a.href=url; a.download=name; a.click();
+  setTimeout(() => URL.revokeObjectURL(url),1000);
 }
+export function exportData() {
+  const raw = readError ? localStorage.getItem(STORAGE_KEY) || '{}' : JSON.stringify(current,null,2);
+  downloadJSON(raw,`mi-carrera-${new Date().toISOString().slice(0,10)}.json`);
+}
+window.addEventListener('storage', event => {
+  if (event.key === STORAGE_KEY || event.key === null) { readLocal(); }
+});
+readLocal();
