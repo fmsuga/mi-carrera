@@ -1,72 +1,9 @@
-# Mi carrera · Analista Programador
+# Mi Carrera
 
-Dashboard personal sin framework ni dependencias de ejecución. Se sirve como archivos estáticos en GitHub Pages, incluido el prefijo `/mi-carrera/`.
+Aplicación web personal para llevar el seguimiento de mi carrera de **Analista Programador en la UNLPam**.
 
-## Desarrollo y pruebas
+La uso para organizar las materias, registrar cursadas, notas y exámenes, consultar correlativas y visualizar mi progreso académico.
 
-Con Node.js 24 o posterior:
+Los datos se guardan localmente en el navegador, con la posibilidad de exportar e importar copias de seguridad.
 
-```sh
-npm test
-npm run dev
-```
-
-Abrir `http://127.0.0.1:4173/mi-carrera/`. El servidor es solo para desarrollo y no publica nada.
-
-Las pruebas del navegador usan Playwright y Microsoft Edge en un contexto aislado, sin acceso al almacenamiento del sitio publicado:
-
-```sh
-npm install --no-save playwright
-node scripts/run-browser-qa.mjs
-```
-
-El servidor debe estar iniciado. La opción `--dashboard-only` regenera únicamente las capturas de Inicio y conserva la verificación funcional de las tres vistas. El runner también acepta como primer argumento la ruta absoluta de una instalación existente de Playwright. Las capturas usan datos de prueba; no son datos personales ni valores precargados en la aplicación. Resultados en `docs/browser-qa.json`.
-
-## Datos existentes
-
-Se conserva `localStorage.ap2_state`, sus claves por nombre de materia y los estados de requisitos `_otro_pc` y `_otro_eps`. El plan conserva 33 materias, 3014 horas y todas sus correlativas y condiciones de idiomas.
-
-- La migración únicamente agrega IDs a exámenes antiguos; mantiene todas sus propiedades y genera una copia exacta previa bajo `ap2_backup_*_pre_migration_v2`.
-- No se escribe ni inicializa sobre un estado ilegible. Ante JSON inválido, esquema incompatible o falta de espacio, se muestra una advertencia y se bloquean los cambios. Exportar permite recuperar el contenido original, incluso si está corrupto.
-- Cada operación lee el último estado guardado, valida, persiste y después actualiza todas las vistas. Web Locks serializa las operaciones entre pestañas en navegadores compatibles; `storage` mantiene las vistas sincronizadas. No hay recargas automáticas.
-- Revertir una materia conserva sus exámenes. La reversión cambia el estado y retira su nota final del promedio; requiere confirmación. Los registros históricos de materias y requisitos no se borran si dejan de cumplirse sus correlativas; se vuelven a validar al realizar una nueva transición.
-- La importación valida antes de pedir confirmación, exige marcar una casilla y guarda la copia previa antes de sustituir el estado. Si el backup falla, la importación se cancela. Las copias se pueden descargar desde Configuración; no se eliminan automáticamente.
-- La equivalencia admite nota opcional. Sin nota suma materias y horas, pero no entra en el divisor del promedio.
-- No existe acción de reinicio o borrado completo.
-
-Los backups del navegador comparten su cuota y no sustituyen una copia externa. No se han leído ni modificado los datos del navegador del sitio publicado durante este desarrollo.
-
-## Archivos e iconos
-
-`assets/favicon.svg` contiene un birrete original en azul y dorado, simplificado para tamaños pequeños. Se incluyen PNG de 16 y 32 px, Apple Touch Icon de 180 px y accesos directos de 192 y 512 px. `manifest.webmanifest` usa rutas relativas, igual que `index.html`. El manifest prepara accesos directos; no se declara soporte offline ni se instala un service worker.
-
-Para regenerar PNG desde el SVG, con sharp instalado como herramienta de desarrollo:
-
-```sh
-npm install --no-save sharp
-node scripts/generate-icons.mjs
-```
-
-## Revisión visual
-
-La iteración actual usa superficies de mayor contraste y una jerarquía tipográfica académica. Inicio concentra porcentaje, promedio, materias aprobadas y horas en una sola hero card a ancho completo; exámenes, hitos y avance por año quedan como contenido secundario. Los encabezados de año no incluyen recuadros numerados y las filas no muestran abreviaturas o identificadores internos. En desktop los cuatrimestres se presentan en paralelo, con horas, estado y nota alineados. Los detalles abiertos ocupan el ancho completo debajo de ambos cuatrimestres; en mobile vuelven a su fila y separan las acciones principales de las secundarias. El contador de resultados aparece solo al buscar o filtrar, y el historial de Configuración se titula Copias de seguridad.
-
-La última pasada conserva esa estructura y refina el anillo, las barras y la iluminación de la hero card. Las entradas son breves, sin bucles, y respetan `prefers-reduced-motion`. El porcentaje se muestra solamente en el resumen principal; la explicación de su cálculo y alcance oficial está disponible en un desplegable discreto.
-
-Los hitos del 40% y 70% se celebran una sola vez por navegador al cruzarlos mediante una aprobación o equivalencia. Un registro de presentación independiente (`ap2_ui_milestones_v1`) evita repeticiones sin cambiar el estado académico ni el JSON exportado. Cargas, importaciones y migraciones registran los hitos existentes silenciosamente. Si ese registro no puede guardarse, la operación académica se conserva y la celebración se omite.
-
-Se incluyen Inter y Source Serif 4 como archivos locales con sus licencias. La aplicación no solicita fuentes ni servicios externos. Los detalles de la revisión, las doce capturas principales y dos ejemplos de celebración están en [docs/revision-visual.md](docs/revision-visual.md).
-
-## Estado de entregas
-
-Entrega 1 con diseño aprobado por el propietario y funcionalidad local verificada: dashboard, búsqueda y filtros, equivalencias, notas, edición y eliminación de exámenes, actualizaciones completas, protección de almacenamiento, importación y exportación, favicon y experiencia responsive.
-
-Entrega 2 completamente en standby por decisión del propietario. La arquitectura ya está evaluada y documentada; no se avanza con backend, base compartida, Telegram ni cambios de hosting. No hay backend desplegado, autenticación, conexión compartida, webhook ni recordatorios operativos. Se retiró la antigua integración que almacenaba tokens en el cliente y solo notificaba con la web abierta. Al iniciar esta versión se eliminan exclusivamente las claves obsoletas `ap2_tgt` y `ap2_tgc`; `ap2_state` y los backups se preservan. La evaluación solicitada está en [docs/arquitectura-entrega-2.md](docs/arquitectura-entrega-2.md).
-
-## Publicación en GitHub Pages
-
-Este checkout funciona como sitio estático desde la raíz, con rutas relativas. No necesita build ni servidor de producción. La navegación usa fragmentos (`#inicio`, `#materias`, `#configuracion`) y no depende de reglas de reescritura.
-
-Se conserva el mecanismo existente: GitHub Pages construye desde `main`, directorio raíz, y publica en `https://fmsuga.github.io/mi-carrera/`. `_config.yml` excluye pruebas, scripts y documentación de revisión del sitio servido; permanecen en el repositorio. La integración usa un merge commit para conservar todos los commits de la rama V2.
-
-Se mantienen el origen y la clave `ap2_state` para reconocer automáticamente el almacenamiento existente. La primera apertura solo agrega IDs faltantes a exámenes antiguos, con una copia exacta previa; no importa backups ni inicializa datos de prueba. Cambiar de dominio requiere una migración voluntaria verificada; el navegador no comparte `localStorage` entre dominios. La verificación automatizada usa contextos aislados y no accede al perfil del usuario.
+[**Ver aplicación**](https://fmsuga.github.io/mi-carrera/)
