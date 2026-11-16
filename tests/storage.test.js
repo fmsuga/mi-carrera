@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { EDITABLE_SUBJECTS, stats } from '../js/core.js';
 class Storage {
   data = new Map();
   failBackup = false;
@@ -76,4 +77,41 @@ test('presentation events identify successful commands, reads and imports precis
   storage.failWrite=true;
   await assert.rejects(s.dispatch({type:'equivalence',subject:'inf'}));
   assert.equal(events.length,3);
+});
+
+const legacyData = withIds => ({
+  'Preliminares de Matemática':{e:'aprobada',nota:8,exs:[]},
+  ...Object.fromEntries(['Inglés I','Inglés II','Inglés III'].map((name,i)=>[name,{e:i===1?'en-curso':'aprobada',nota:i===1?null:String(7+i),extra:{keep:true},exs:[{...(withIds?{id:'ex-original-'+i}:{}),tipo:'Final',fecha:'2026-12-01',nota:6,custom:'keep'}]}])),
+  'Base de Datos II':{e:'aprobada',nota:10,exs:[{tipo:'Final',fecha:'2026-12-01',nota:10}],extra:{keep:true}},
+  'Proyecto Final II':{e:'en-curso',exs:[{id:'original-outside-id',tipo:'Final',fecha:'2026-12-01',nota:null}]},
+  'Registro sin correspondencia':{original:[1,{preserve:true}]},
+  _otro_pc:'acreditado',_otro_eps:'en-curso',
+});
+test('V1 to corrected plan: exact prior backup; only editable exam IDs added',async() => {
+  const old=legacyData(false),raw=JSON.stringify(old,null,2),{s,storage}=await setup(raw);
+  assert.equal(s.getReadError(),'');
+  assert.ok([...storage.data.entries()].some(([k,v])=>k.includes('pre_migration')&&v===raw));
+  const restored=structuredClone(s.getState());
+  for(const m of EDITABLE_SUBJECTS) for(const ex of restored[m.n]?.exs||[]) { assert.ok(ex.id); delete ex.id; }
+  assert.deepEqual(restored,old);
+  const migrated=storage.getItem('ap2_state');s.readLocal();assert.equal(storage.getItem('ap2_state'),migrated);
+  assert.equal(stats(s.getState()).ap,1);assert.equal(stats(s.getState()).prom,8);
+});
+test('V2 to corrected plan: category changes never rewrite any academic bytes',async() => {
+  const old=legacyData(true),raw=JSON.stringify(old,null,2),{s,storage}=await setup(raw);
+  assert.equal(s.getReadError(),'');assert.deepEqual(s.getState(),old);
+  assert.equal(storage.getItem('ap2_state'),raw);assert.equal(storage.data.size,1);
+  s.readLocal();assert.equal(storage.getItem('ap2_state'),raw);
+});
+test('old JSON import keeps English, historical and unmapped records, with exact prior backup',async() => {
+  const previous='{"Preliminares de Matemática":{"e":"aprobada","nota":8}}';
+  const {s,storage}=await setup(previous),old=legacyData(true);
+  await s.replaceLocal(old);assert.deepEqual(s.getState(),old);
+  assert.ok([...storage.data.entries()].some(([k,v])=>k.includes('pre_import')&&v===previous));
+  assert.equal(stats(s.getState()).ap,1);
+  await s.dispatch({type:'equivalence',subject:'inf'});
+  for(const name of ['Inglés I','Inglés II','Inglés III','Base de Datos II','Proyecto Final II','Registro sin correspondencia']) assert.deepEqual(s.getState()[name],old[name]);
+});
+test('empty profile is never initialized with an empty state or sample data',async() => {
+  const {s,storage}=await setup();assert.deepEqual(s.getState(),{});assert.equal(storage.getItem('ap2_state'),null);assert.equal(storage.data.size,0);
 });

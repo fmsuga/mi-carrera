@@ -1,4 +1,4 @@
-import { SUBJECTS, OTROS, TOTAL_M, TOTAL_H, STATUS, ms, stats, bloqueoActivar, upcoming, daysUntil } from './core.js';
+import { SUBJECTS, LANGUAGES, EDITABLE_SUBJECTS, OTROS, TOTAL_M, TOTAL_H, STATUS, retainedRecords, ms, stats, bloqueoActivar, upcoming, daysUntil } from './core.js';
 import { getState, getReadError } from './state.js';
 import { icon, html, fmt, pct } from './ui.js';
 const $ = id => document.getElementById(id);
@@ -11,30 +11,44 @@ const action = (type, label, subject, cls = '', extra = '') => `<button class="b
 
 function examAgenda(list) {
   if (!list.length) return `<div class="empty-state"><h3>No hay exámenes programados</h3><p>Agregá un examen desde la materia que estás cursando para organizar tu próxima fecha.</p><a href="#materias" class="btn">Ir a Materias ${icon('arrow')}</a></div>`;
-  let previousGroup;
-  return `<div class="exam-list">${list.map(ex => {
+  const groups = new Map();
+  for (const ex of list) {
+    const label = daysUntil(ex.fecha) <= 7 ? 'En los próximos 7 días' : 'Más adelante';
+    if (!groups.has(label)) groups.set(label,[]);
+    groups.get(label).push(ex);
+  }
+  return `<div class="exam-list ${groups.size === 1 ? 'single-agenda' : ''}">${[...groups].map(([group,items]) => `<section class="agenda-section" aria-label="${group}"><h3 class="agenda-group">${group}</h3>${items.map(ex => {
     const days = daysUntil(ex.fecha);
-    const group = days <= 7 ? 'En los próximos 7 días' : 'Más adelante';
-    const heading = group !== previousGroup ? `<h3 class="agenda-group">${group}</h3>` : '';
-    previousGroup = group;
     const month = new Date(ex.fecha+'T12:00:00').toLocaleDateString('es-AR',{month:'short'}).replace('.','');
-    return `${heading}<div class="exam-item">
+    return `<div class="exam-item">
       <time class="exam-date" datetime="${ex.fecha}"><strong>${ex.fecha.slice(8)}</strong><span>${month}</span></time>
       <div class="exam-info"><h3>${html(ex.name)}</h3><p>${html(ex.tipo)} · ${fmt(ex.fecha)}</p></div>
       <span class="exam-timing ${days === 0 ? 'red' : days <= 7 ? 'yellow' : 'muted'}">${days === 0 ? 'Hoy' : days === 1 ? 'Mañana' : `En ${days} días`}</span>
       <button class="icon-btn" data-action="exam-edit" data-subject="${ex.subjectId}" data-id="${html(ex.id)}" aria-label="Editar ${html(ex.tipo)} de ${html(ex.name)}">${icon('edit')}</button>
     </div>`;
-  }).join('')}</div>`;
+  }).join('')}</section>`).join('')}</div>`;
+}
+
+function renderMilestones(s) {
+  return `<details class="panel milestones-card" id="dashboard-milestones">
+    <summary class="milestones-summary" id="dashboard-milestones-summary"><h2>Hitos del plan</h2><span>40% y 70%</span><span class="chevron">${icon('chevron')}</span></summary>
+    <div class="milestones">${OTROS.map(r => {
+      const goal = Math.ceil(TOTAL_M * r.threshold), left = Math.max(0,goal - s.ap);
+      return `<div class="milestone"><div class="milestone-title"><span class="milestone-percentage">${r.threshold * 100}%</span><h3>${r.n}</h3></div>
+        ${bar(s.ap / goal * 100,'milestone-'+r.id)}
+        <div class="milestone-status"><p class="${left ? 'muted' : 'green'}">${left ? `Faltan ${left} ${left === 1 ? 'materia' : 'materias'}` : 'Requisito habilitado'}</p><span>${Math.min(s.ap,goal)} / ${goal} aprobadas</span></div></div>`;
+    }).join('')}</div>
+  </details>`;
 }
 
 export function renderDash() {
   const data = getState(), s = stats(data), list = upcoming(data);
-  const statuses = [ [s.cur,'En curso','yellow'],[s.pen,'Pendientes','muted'],...(s.des ? [[s.des,'Desaprobadas','red']] : []) ];
+  const statuses = [ [s.cur,'En curso','yellow'],[s.pen+s.des,'Pendientes','muted'] ];
   $('dashboard').innerHTML = `
     <article class="panel academic-hero" aria-label="Resumen principal de la carrera">
       <div class="hero-main">
         <div class="ring" role="img" aria-label="${pct(s.pct)} por ciento de materias aprobadas">
-          <svg viewBox="0 0 180 180" aria-hidden="true"><defs><linearGradient id="career-ring-gradient" gradientUnits="userSpaceOnUse" x1="18" y1="160" x2="162" y2="20"><stop offset="0" stop-color="#6b9dd7"/><stop offset=".55" stop-color="#a2c9f1"/><stop offset="1" stop-color="#d6e8fb"/></linearGradient></defs><circle class="ring-track" cx="90" cy="90" r="78"/><circle class="ring-progress" data-progress-key="career-ring" data-progress-value="${s.pct}" stroke="url(#career-ring-gradient)" cx="90" cy="90" r="78" pathLength="100" stroke-opacity="${s.ap ? 1 : 0}" stroke-dasharray="${s.pct} 100"/></svg>
+          <svg viewBox="0 0 180 180" aria-hidden="true"><defs><linearGradient id="career-ring-gradient" gradientUnits="userSpaceOnUse" x1="18" y1="160" x2="162" y2="20"><stop offset="0" stop-color="#788deb"/><stop offset=".48" stop-color="#a9baff"/><stop offset="1" stop-color="#9de4db"/></linearGradient></defs><circle class="ring-track" cx="90" cy="90" r="78"/><circle class="ring-progress" data-progress-key="career-ring" data-progress-value="${s.pct}" stroke="url(#career-ring-gradient)" cx="90" cy="90" r="78" pathLength="100" stroke-opacity="${s.ap ? 1 : 0}" stroke-dasharray="${s.pct} 100"/></svg>
           <div class="ring-center"><div class="ring-value">${pct(s.pct)}<small>%</small></div><span class="ring-caption">DE LA CARRERA</span></div>
         </div>
         <div class="hero-metrics">
@@ -50,38 +64,22 @@ export function renderDash() {
         <div class="hero-average">
           <h2>Promedio general</h2>
           <div class="average-value">${s.prom === null ? '—' : s.prom.toFixed(2).replace('.',',')} <small>/ 10</small></div>
-          <p class="average-note">${s.graded ? `Sobre ${s.graded} ${s.graded === 1 ? 'materia con nota final' : 'materias con nota final'}.` : 'Todavía no hay notas finales.'}</p>
-          <p class="average-explanation">Las aprobaciones sin nota no alteran el promedio.</p>
+          <dl class="hero-status">${statuses.map(([n,label,c]) => `<div><dt>${label}</dt><dd class="${c}">${n}</dd></div>`).join('')}</dl>
         </div>
       </div>
-      <div class="hero-footer">
-        <p class="hero-context">${s.ap === TOTAL_M ? 'Completaste todas las materias del plan.' : `Te ${TOTAL_M - s.ap === 1 ? 'queda 1 materia' : `quedan ${TOTAL_M - s.ap} materias`} para completar el plan.`}</p>
-        <dl class="hero-status">${statuses.map(([n,label,c]) => `<div><dt>${label}</dt><dd class="${c}">${n}</dd></div>`).join('')}</dl>
-      </div>
-      <details class="progress-disclosure" id="progress-info"><summary id="progress-info-summary">Cómo se calcula el progreso ${icon('chevron')}</summary><p>Se calcula por materias aprobadas sobre las ${TOTAL_M} del plan; las horas se muestran por separado. Es un indicador informativo y no constituye certificación oficial.</p></details>
     </article>
-    <div class="lower-grid">
       <article class="panel agenda-card">
         <div class="section-head"><div><h2>Próximos exámenes</h2><p>${list.length ? `${list.length} ${list.length === 1 ? 'examen pendiente de rendir' : 'exámenes pendientes de rendir'}` : 'Tu agenda académica'}</p></div><a class="text-link" href="#materias">Ver materias ${icon('arrow')}</a></div>
         ${examAgenda(list)}
       </article>
-      <article class="panel milestones-card">
-        <div class="section-head"><div><h2>Hitos del plan</h2><p>Avance requerido para habilitar otros requisitos.</p></div></div>
-        <div class="milestones">${OTROS.map(r => {
-          const goal = Math.ceil(TOTAL_M * r.threshold), left = Math.max(0,goal - s.ap);
-          return `<div class="milestone"><div class="milestone-title"><span class="milestone-percentage">${r.threshold * 100}%</span><h3>${r.n}</h3></div>
-            ${bar(s.ap / goal * 100,'milestone-'+r.id)}
-            <div class="milestone-status"><p class="${left ? 'muted' : 'green'}">${left ? `Faltan ${left} ${left === 1 ? 'materia' : 'materias'}` : 'Requisito habilitado'}</p><span>${Math.min(s.ap,goal)} / ${goal} aprobadas</span></div></div>`;
-        }).join('')}</div>
-      </article>
-    </div>
     <section class="year-overview" aria-label="Avance por año">
-      <div class="year-overview-head"><div><h2>Avance por año</h2><p>Incluye las materias de idiomas de cada año.</p></div></div>
-      <div class="year-mini-grid">${[1,2,3,4].map(year => {
+      <div class="year-overview-head"><div><h2>Avance por año</h2><p>Asignaturas del plan 2025. Los idiomas se contabilizan por separado.</p></div></div>
+      <div class="year-mini-grid">${[1,2,3].map(year => {
         const mats = SUBJECTS.filter(m => m.a === year), ap = mats.filter(m => ms(data,m.n).e === 'aprobada').length;
-        return `<div class="year-mini"><div class="bar-label"><strong>${['Primer','Segundo','Tercer','Cuarto'][year-1]} año</strong><span>${pct(ap / mats.length * 100)}%</span></div>${bar(ap / mats.length * 100,'overview-'+year)}<p>${ap} de ${mats.length} aprobadas</p></div>`;
+        return `<div class="year-mini"><div class="bar-label"><strong>${['Primer','Segundo','Tercer'][year-1]} año</strong><span>${pct(ap / mats.length * 100)}%</span></div>${bar(ap / mats.length * 100,'overview-'+year)}<p>${ap} de ${mats.length} aprobadas</p></div>`;
       }).join('')}</div>
-    </section>`;
+    </section>
+    ${renderMilestones(s)}`;
 }
 
 function subjectRow(m, data) {
@@ -112,7 +110,7 @@ function subjectRow(m, data) {
       </div>
       ${reason && s.e !== 'aprobada' ? `<p class="notice">${icon('lock')} ${html(reason)}${s.e === 'en-curso' ? ' Se conserva tu cursada registrada.' : ''}</p>` : ''}
       <div class="detail-grid">
-        <div><h3>Correlativas</h3><div class="corr-list">${m.r.length ? m.r.map(n => `<span class="${ms(data,n).e === 'aprobada' ? 'green' : 'muted'}">${icon(ms(data,n).e === 'aprobada' ? 'check' : 'circle')}${html(n)}</span>`).join('') : '<p>Sin correlativas del plan.</p>'}</div></div>
+        <div><h3>${m.forYear ? 'Condición académica' : 'Correlativas'}</h3><div class="corr-list">${m.forYear ? `<p>${html(m.cond)}</p>` : m.r.length ? m.r.map(n => `<span class="${ms(data,n).e === 'aprobada' ? 'green' : 'muted'}">${icon(ms(data,n).e === 'aprobada' ? 'check' : 'circle')}${html(n)}</span>`).join('') : '<p>Sin correlativas del plan.</p>'}</div></div>
         <div><h3>Exámenes registrados</h3>${s.exs.length ? s.exs.map(ex => `<div class="exam-record"><div><strong>${html(ex.tipo)}${ex.cancelado ? ' · Cancelado' : ''}</strong><p>${fmt(ex.fecha)} · ${ex.nota == null ? 'Sin calificar' : 'Nota: '+html(ex.nota)}</p></div><div class="exam-record-actions"><button class="icon-btn" data-action="exam-edit" data-subject="${m.id}" data-id="${html(ex.id)}" aria-label="Editar ${html(ex.tipo)}">${icon('edit')}</button><button class="icon-btn" data-action="exam-delete" data-subject="${m.id}" data-id="${html(ex.id)}" aria-label="Eliminar ${html(ex.tipo)}">${icon('trash')}</button></div></div>`).join('') : '<p class="caption">Todavía no registraste exámenes.</p>'}</div>
       </div>
     </div>
@@ -131,23 +129,23 @@ export function renderMats() {
     const s = ms(data,m.n);
     return m.n.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().includes(query) && (filter === 'all' || (filter === 'equivalencia' ? s.e === 'aprobada' && s.equivalencia : s.e === filter));
   };
-  const visible = SUBJECTS.filter(matches);
+  const visible = EDITABLE_SUBJECTS.filter(matches);
   const filtering = query.length > 0 || filter !== 'all';
   $('result-count').hidden = !filtering;
-  $('result-count').textContent = filtering ? `${visible.length} de ${TOTAL_M} materias` : '';
-  $('plan-count').textContent = `${TOTAL_M} materias · ${TOTAL_H.toLocaleString('es-AR')} horas`;
-  const groups = [1,2,3,4,'ing'].map(year => {
-    const all = SUBJECTS.filter(m => year === 'ing' ? m.n.startsWith('Inglés') : m.a === year && !m.n.startsWith('Inglés'));
+  $('result-count').textContent = filtering ? `${SUBJECTS.filter(matches).length} de ${TOTAL_M} asignaturas · ${LANGUAGES.filter(matches).length} de ${LANGUAGES.length} niveles de Inglés` : '';
+  $('plan-count').textContent = `${TOTAL_M} asignaturas · ${TOTAL_H.toLocaleString('es-AR')} h · 3 años`;
+  const groups = [1,2,3,'ing'].map(year => {
+    const all = year === 'ing' ? LANGUAGES : SUBJECTS.filter(m => m.a === year);
     const mats = all.filter(matches), ap = all.filter(m => ms(data,m.n).e === 'aprobada').length;
     if (!mats.length) return '';
     const columns = year === 'ing'
-      ? semesterColumn(mats,'Idiomas del plan',data)
+      ? semesterColumn(mats,'Requisitos independientes de las 22 asignaturas',data)
       : [1,2].map(c => {
         const cm = mats.filter(m => m.c === c);
         return cm.length ? semesterColumn(cm,`${c === 1 ? 'Primer' : 'Segundo'} cuatrimestre`,data) : '';
       }).join('');
     return `<details class="panel year-block" id="year-${year}" ${query || filter !== 'all' ? 'open' : ''}>
-      <summary class="year-summary"><div class="year-name"><h2>${year === 'ing' ? 'Idiomas' : ['Primer','Segundo','Tercer','Cuarto'][year-1]+' año'}</h2><p>${ap} de ${all.length} materias aprobadas</p></div><div class="year-progress"><div class="bar-label"><strong><span class="sr-only">Avance: </span>${pct(ap/all.length*100)}%</strong></div>${bar(ap/all.length*100,'year-'+year)}</div><span class="chevron">${icon('chevron')}</span></summary>
+      <summary class="year-summary"><div class="year-name"><h2>${year === 'ing' ? 'Requisitos de Inglés' : ['Primer','Segundo','Tercer'][year-1]+' año'}</h2><p>${ap} de ${all.length} ${year === 'ing' ? 'niveles acreditados' : 'asignaturas aprobadas'}</p></div><div class="year-progress"><div class="bar-label"><strong><span class="sr-only">Avance: </span>${pct(ap/all.length*100)}%</strong></div>${bar(ap/all.length*100,'year-'+year)}</div><span class="chevron">${icon('chevron')}</span></summary>
       <div class="semester-grid ${year === 'ing' || new Set(mats.map(m => m.c)).size === 1 ? 'single-semester' : ''}">${columns}</div>
       <div class="year-subject-details" hidden></div>
     </details>`;
@@ -188,12 +186,15 @@ export function renderAll() {
   const active = document.activeElement;
   const focus = active && { id:active.id, action:active.dataset.action, subject:active.dataset.subject, exam:active.dataset.id, details:active.dataset.subject ? 'subject-'+active.dataset.subject : active.closest('details')?.id };
   const scroll = window.scrollY;
-  const progressInfoOpen = $('progress-info')?.open || false;
+  const milestonesOpen = $('dashboard-milestones')?.open || false;
   renderDash(); renderMats();
-  $('progress-info').open = progressInfoOpen;
+  $('dashboard-milestones').open = milestonesOpen;
   openIds.forEach(id => { const el = $(id); if (el) el.open = true; });
   syncSubjectDetails();
   $('data-warning').hidden = !getReadError(); $('data-warning').textContent = getReadError();
+  const unmapped = retainedRecords(getState()).filter(r => !r.historical);
+  $('mapping-warning').hidden = !unmapped.length;
+  $('mapping-warning').textContent = !unmapped.length ? '' : unmapped.length === 1 ? 'Se conserva 1 registro sin correspondencia segura, fuera de las estadísticas. Revisalo en Configuración; su información permanece intacta.' : `Se conservan ${unmapped.length} registros sin correspondencia segura, fuera de las estadísticas. Revisalos en Configuración; su información permanece intacta.`;
   if (!$('page-configuracion').hidden) renderBackups();
   if (focus && !active.isConnected) {
     const next = focus.id ? $(focus.id) : [...document.querySelectorAll('[data-action]')].find(el => el.dataset.action === focus.action && el.dataset.subject === focus.subject && el.dataset.id === focus.exam);
@@ -203,6 +204,8 @@ export function renderAll() {
 }
 
 export function renderBackups() {
+  const retained = retainedRecords(getState());
+  $('retained-records').innerHTML = retained.length ? `<details class="panel config-card"><summary>Información conservada fuera del plan (${retained.length})</summary><p class="section-description">Estos registros permanecen íntegros en el navegador y en la exportación JSON. No participan en estadísticas ni en la agenda del plan activo.</p><ul>${retained.map(r => `<li>${html(r.key)} · ${r.historical ? 'Histórico' : 'Sin correspondencia segura; requiere revisión'}</li>`).join('')}</ul></details>` : '';
   let keys;
   try { keys = Object.keys(localStorage).filter(k => k.startsWith('ap2_backup_')).sort().reverse(); }
   catch { $('backup-list').textContent = 'El navegador no permite acceder al almacenamiento.'; return; }

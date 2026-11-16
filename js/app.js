@@ -1,5 +1,5 @@
 import { subscribe, getState } from './state.js';
-import { SUBJECTS, ms } from './core.js';
+import { SUBJECTS, EDITABLE_SUBJECTS, ms } from './core.js';
 import { renderAll, renderMats, renderBackups, syncSubjectDetails } from './render.js';
 import { initActions } from './actions.js';
 import { hydrateIcons } from './ui.js';
@@ -29,7 +29,7 @@ $('mat-list').addEventListener('toggle',event => {
 },true);
 window.matchMedia('(min-width: 1051px)').addEventListener('change',syncSubjectDetails);
 subscribe(renderAll); renderAll();
-const initialSubject = SUBJECTS.find(m => ms(getState(),m.n).e === 'en-curso') || SUBJECTS.find(m => ms(getState(),m.n).e !== 'aprobada') || SUBJECTS.at(-1);
+const initialSubject = EDITABLE_SUBJECTS.find(m => ms(getState(),m.n).e === 'en-curso') || SUBJECTS.find(m => ms(getState(),m.n).e !== 'aprobada') || SUBJECTS.at(-1);
 $('year-' + (initialSubject.n.startsWith('Inglés') ? 'ing' : initialSubject.a)).open=true;
 $('today-label').textContent=new Intl.DateTimeFormat('es-AR',{weekday:'long',day:'numeric',month:'long'}).format(new Date());
 $('search').addEventListener('input',filter);

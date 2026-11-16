@@ -30,7 +30,7 @@ export async function runBrowserQA(page,{dashboardOnly=false}={}) {
   const migrated=await page.evaluate(() => JSON.parse(localStorage.getItem('ap2_state')));
   const hero=page.locator('.academic-hero');
   check(await hero.count() === 1 && await hero.locator('.panel').count() === 0,'Un único resumen principal sin tarjetas internas');
-  check(await hero.locator('.hero-subjects .hero-metric-value').innerText() === '1 / 33' && await hero.locator('.hero-hours .hero-metric-value').innerText() === '60 / 3.014 h','Materias y horas reales integradas en la hero card');
+  check(await hero.locator('.hero-subjects .hero-metric-value').innerText() === '1 / 22' && await hero.locator('.hero-hours .hero-metric-value').innerText() === '60 / 2.044 h','Materias y horas reales integradas en la hero card');
   check(await hero.locator('.average-value').innerText() === '8,00 / 10' && await hero.locator('.ring-value').isVisible(),'Promedio y porcentaje visibles en la misma superficie');
   check(!!migrated['Introducción a la Informática'].exs[0].id,'Migración preserva los exámenes y asigna IDs');
   check(await page.evaluate(raw => Object.keys(localStorage).filter(k => k.startsWith('ap2_backup_')).some(k => localStorage.getItem(k) === raw),original),'Backup previo conserva los bytes originales');
@@ -75,11 +75,11 @@ export async function runBrowserQA(page,{dashboardOnly=false}={}) {
   check(await page.locator('#detail-alg [data-action="activate"]').isDisabled(),'Revertir correlativa actualiza bloqueos al instante');
   await page.locator('#search').fill('ingles');
   check(await page.locator('#result-count').isVisible(),'Contador visible al buscar materias');
-  check(await page.locator('#result-count').innerText() === '3 de 33 materias','Búsqueda ignora tildes y mantiene el foco');
+  check(await page.locator('#result-count').innerText() === '0 de 22 asignaturas · 3 de 3 niveles de Inglés','Búsqueda ignora tildes y mantiene el foco');
   check(await page.locator('#search').evaluate(el => el === document.activeElement),'Buscador conserva foco');
   await page.locator('#search').fill('');
   await page.locator('#status-filter').selectOption('en-curso');
-  check(await page.locator('#result-count').innerText() === '1 de 33 materias','Filtro por estado funcional');
+  check(await page.locator('#result-count').innerText() === '1 de 22 asignaturas · 0 de 3 niveles de Inglés','Filtro por estado funcional');
   await page.locator('#status-filter').selectOption('all');
   check(await page.locator('#result-count').isHidden(),'Quitar todos los filtros vuelve a ocultar el contador');
   const second=await page.context().newPage(); await second.goto(base+'#materias');
@@ -113,8 +113,8 @@ export async function runBrowserQA(page,{dashboardOnly=false}={}) {
   // Seed a complete, labelled-in-report fixture for responsive screenshots.
   await page.evaluate(async() => {
     const c=await import('./js/core.js'); let data={};
-    for(const m of c.SUBJECTS.slice(0,14)) data=c.applyCommand(data,{type:'equivalence',subject:m.id});
-    for(const id of ['pre','alg','ama','inf','in1','amb','dis','pro','diu','eda','syo','in2','ads1']) data=c.applyCommand(data,{type:'approve',subject:id,grade:8});
+    for(const m of c.SUBJECTS.slice(0,11)) data=c.applyCommand(data,{type:'equivalence',subject:m.id});
+    for(const id of ['pre','alg','ama','inf','in1','amb','dis','pro','diu','eda','syo']) data=c.applyCommand(data,{type:'approve',subject:id,grade:8});
     for(const id of ['lia','pye']) data=c.applyCommand(data,{type:'activate',subject:id});
     const today=c.todayISO(); const date=days => new Date(Date.parse(today)+days*86400000).toISOString().slice(0,10);
     data=c.applyCommand(data,{type:'exam-add',subject:'lia',id:'ex-qa-near',kind:'Parcial 2',date:date(3)});
@@ -160,16 +160,16 @@ export async function runBrowserQA(page,{dashboardOnly=false}={}) {
   check(await page.locator('#detail-lia [data-action="exam-add"]').evaluate(el => el === document.activeElement),'Cambiar entre mobile y desktop conserva detalle abierto y foco');
   check(await page.evaluate(() => localStorage.getItem('ap2_state')) === savedBeforeLayout,'Abrir, cerrar y redistribuir detalles no modifica los datos guardados');
   const dimensions=[];
-  for(const width of [1920,1440,1280,768,390]) {
+  for(const width of [1920,1440,1280,768,390,360,320]) {
     await page.setViewportSize({width,height:1000});
     for(const route of ['inicio','materias','configuracion']) {
       await page.goto(base+'#'+route);
       if (route === 'inicio') {
         const layout=await hero.evaluate(el => {
           const box=el.getBoundingClientRect(), dashboard=el.parentElement.getBoundingClientRect();
-          return {fullWidth:Math.abs(box.width-dashboard.width) < 1,inside:[...el.querySelectorAll('.ring,.hero-subjects,.hero-hours,.hero-average')].every(metric => { const m=metric.getBoundingClientRect(); return m.left >= box.left && m.right <= box.right && m.top >= box.top && m.bottom <= box.bottom; })};
+          return {fullWidth:Math.abs(box.width-dashboard.width) < 1,compact:box.height<=(innerWidth<=760?340:260),inside:[...el.querySelectorAll('.ring,.hero-subjects,.hero-hours,.hero-average')].every(metric => { const m=metric.getBoundingClientRect(); return m.left >= box.left && m.right <= box.right && m.top >= box.top && m.bottom <= box.bottom; })};
         });
-        assert.ok(layout.fullWidth && layout.inside,`Resumen integrado sin desbordes a ${width}px`);
+        assert.ok(layout.fullWidth && layout.inside && layout.compact,`Resumen compacto e integrado sin desbordes a ${width}px`);
       }
       if(route === 'materias') {
         await page.locator('#year-1').evaluate(el => el.open=true);
@@ -186,8 +186,8 @@ export async function runBrowserQA(page,{dashboardOnly=false}={}) {
       dimensions.push(`${width}:${route}`);
     }
   }
-  check(dimensions.length === 15,'Sin desborde en 1920, 1440, 1280, 768 y 390 px en las tres vistas');
-  check(true,'Hero a ancho completo con las cuatro métricas contenidas en desktop, tablet y mobile');
+  check(dimensions.length === 21,'Sin desborde en 1920, 1440, 1280, 768, 390, 360 y 320 px en las tres vistas');
+  check(true,'Hero compacta: hasta 260 px de alto en desktop y 340 px en mobile, con sus métricas contenidas');
   for(const [width,name] of [[1920,'desktop-1920'],[1440,'desktop'],[1280,'desktop-1280'],[390,'mobile']]) {
     await page.setViewportSize({width,height:1000});
     await page.goto(base+'#inicio');
@@ -195,6 +195,10 @@ export async function runBrowserQA(page,{dashboardOnly=false}={}) {
     await page.evaluate(() => window.scrollTo(0,0));
     await page.evaluate(() => document.fonts.ready);
     await capture(page,'dashboard-'+name);
+    if(name==='desktop'||name==='mobile') {
+      await page.locator('#dashboard-milestones-summary').click();await capture(page,'hitos-'+name);
+      await page.locator('#dashboard-milestones-summary').click();
+    }
     if (dashboardOnly) continue;
     await page.goto(base+'#materias');
     await page.locator('#mat-list details').evaluateAll(els => els.forEach(el => el.open=false));
@@ -213,23 +217,35 @@ export async function runBrowserQA(page,{dashboardOnly=false}={}) {
   check(true,'SVG, PNG, iconos móviles, manifest y módulos responden 200 bajo /mi-carrera/');
   await page.evaluate(async() => {
     const c=await import('./js/core.js'); let data={};
-    for(const m of c.SUBJECTS) data=c.applyCommand(data,{type:'equivalence',subject:m.id});
+    for(const m of c.SUBJECTS) data=c.applyCommand(data,{type:'equivalence',subject:m.id,grade:10});
     localStorage.setItem('ap2_state',JSON.stringify(data)); (await import('./js/state.js')).readLocal();
   });
   await page.goto(base+'#inicio');
   check((await page.locator('.ring-value').innerText()).includes('100'),'Dashboard llega al 100% con todas las materias aprobadas');
+  for(const width of [390,360,320]) {
+    await page.setViewportSize({width,height:1000});
+    assert.ok(await hero.evaluate(el=>{
+      const box=el.getBoundingClientRect(),walker=document.createTreeWalker(el,NodeFilter.SHOW_TEXT);
+      let node;while(node=walker.nextNode()) {
+        if(!node.textContent.trim()||node.parentElement.closest('svg'))continue;
+        const range=document.createRange();range.selectNodeContents(node);const text=range.getBoundingClientRect();
+        if(text.left<box.left||text.right>box.right)return false;
+      }return document.documentElement.scrollWidth<=innerWidth;
+    }),`100% y promedio 10 sin texto fuera de la hero a ${width}px`);
+  }
+  check(true,'El caso máximo de 100% y promedio 10 conserva todo el texto dentro de la hero hasta 320 px');
   await page.goto(base+'#materias');
   await page.locator('#req-eps > summary').click();
   check(await page.locator('#req-eps [data-status="en-curso"]').isEnabled(),'Requisito EPS se habilita automáticamente al superar el 70%');
   await page.evaluate(async() => {
     const c=await import('./js/core.js'), s=await import('./js/state.js');
-    for(const m of c.SUBJECTS.slice(13)) await s.dispatch({type:'revert',subject:m.id});
+    for(const m of c.SUBJECTS.slice(8)) await s.dispatch({type:'revert',subject:m.id});
   });
   check(await page.locator('#req-eps [data-status="en-curso"]').isDisabled(),'EPS vuelve a bloquearse al bajar del porcentaje requerido');
   await page.locator('#req-pc > summary').click();
-  check(await page.locator('#req-pc [data-status="en-curso"]').isDisabled(),'Prácticas Comunitarias se bloquea por debajo de 14 aprobadas');
+  check(await page.locator('#req-pc [data-status="en-curso"]').isDisabled(),'Prácticas Comunitarias se bloquea por debajo de 9 aprobadas');
   await page.evaluate(async() => (await import('./js/state.js')).dispatch({type:'equivalence',subject:'arq'}));
-  check(await page.locator('#req-pc [data-status="en-curso"]').isEnabled(),'Prácticas Comunitarias se actualiza al alcanzar 14 aprobadas');
+  check(await page.locator('#req-pc [data-status="en-curso"]').isEnabled(),'Prácticas Comunitarias se actualiza al alcanzar 9 aprobadas');
   // Corrupt state must remain byte-for-byte intact even after opening the app.
   await page.evaluate(() => localStorage.setItem('ap2_state','{broken'));
   await page.reload();

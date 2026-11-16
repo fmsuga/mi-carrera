@@ -1,11 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { SUBJECTS, TOTAL_M, TOTAL_H, OTROS, ms, normalizeState, stats, bloqueoActivar, applyCommand, upcoming, todayISO, daysUntil } from '../js/core.js';
+import { SUBJECTS, LANGUAGES, EDITABLE_SUBJECTS, HISTORICAL_SUBJECTS, retainedRecords, TOTAL_M, TOTAL_H, OTROS, ms, normalizeState, stats, bloqueoActivar, applyCommand, upcoming, todayISO, daysUntil } from '../js/core.js';
 const equiv = (data,id) => applyCommand(data,{type:'equivalence',subject:id});
-test('plan unchanged: 33 subjects, 3014 hours and stable unique explicit IDs',() => {
-  assert.equal(TOTAL_M,33); assert.equal(TOTAL_H,3014);
-  assert.equal(new Set(SUBJECTS.map(m => m.id)).size,33);
+test('official 2025 plan: 22 subjects, 2044 hours, three years and stable IDs',() => {
+  assert.equal(TOTAL_M,22); assert.equal(TOTAL_H,2044);
+  assert.equal(new Set(SUBJECTS.map(m => m.id)).size,22);
+  assert.deepEqual([1,2,3].map(year => SUBJECTS.filter(m => m.a === year).length),[7,7,8]);
+  assert.ok(SUBJECTS.every(m => m.a <= 3));
+  assert.deepEqual(LANGUAGES.map(m => [m.id,m.n,m.h,m.r]),[['in1','Inglés I',70,[]],['in2','Inglés II',100,[]],['in3','Inglés III',80,[]]]);
+  assert.equal(new Set([...EDITABLE_SUBJECTS,...HISTORICAL_SUBJECTS].map(m => m.id)).size,33);
   for(const m of SUBJECTS) for(const n of m.r) assert.ok(SUBJECTS.some(x => x.n === n));
   assert.deepEqual(OTROS.map(r => [r.id,r.h,r.threshold]),[['pc',40,.4],['eps',70,.7]]);
 });
@@ -14,9 +18,9 @@ test('0%, intermediate and 100%; equivalents count hours and exclude ungraded av
   let data=applyCommand({},{type:'approve',subject:'pre',grade:8});
   data=equiv(data,'inf');
   assert.equal(stats(data).prom,8); assert.equal(stats(data).ap,2); assert.equal(stats(data).hAp,156);
-  assert.equal(stats(data).pct,2/33*100);
+  assert.equal(stats(data).pct,2/22*100);
   for(const m of SUBJECTS) data=equiv(data,m.id);
-  assert.equal(stats(data).pct,100); assert.equal(stats(data).hAp,3014); assert.equal(stats(data).prom,null);
+  assert.equal(stats(data).pct,100); assert.equal(stats(data).hAp,2044); assert.equal(stats(data).prom,null);
 });
 test('numeric legacy grades and approvals without a grade',() => {
   const data={'Álgebra':{e:'aprobada',nota:'7',exs:[]},'Inglés I':{e:'aprobada',nota:null}};
@@ -33,7 +37,7 @@ test('legacy migration is additive, deterministic and idempotent',() => {
   assert.equal(migrated.custom.retained,true); assert.equal(migrated['Introducción a la Informática'].custom,'keep');
 });
 test('reject malformed imports without mutating input',() => {
-  for(const data of [null,[],42,{'Álgebra':{e:'wrong'}},{'Álgebra':{exs:{}}},{'Álgebra':{nota:11}},{'Álgebra':{exs:[{tipo:'Final',fecha:'2026-02-30'}]}},{unknown:{}}]) assert.throws(() => normalizeState(data,true));
+  for(const data of [null,[],42,{'Álgebra':{e:'wrong'}},{'Álgebra':{exs:{}}},{'Álgebra':{nota:11}},{'Álgebra':{exs:[{tipo:'Final',fecha:'2026-02-30'}]}}]) assert.throws(() => normalizeState(data,true));
   assert.throws(() => normalizeState(JSON.parse('{"__proto__":{}}')));
 });
 test('prerequisites and language constraints re-evaluate after reversals',() => {
@@ -52,14 +56,14 @@ test('prerequisites and language constraints re-evaluate after reversals',() => 
 });
 test('40% and 70% thresholds, including re-locking without erasing requirements',() => {
   let data={};
-  for(const m of SUBJECTS.slice(0,13)) data=equiv(data,m.id);
+  for(const m of SUBJECTS.slice(0,8)) data=equiv(data,m.id);
   assert.throws(() => applyCommand(data,{type:'requirement',id:'pc',status:'en-curso'}));
-  data=equiv(data,SUBJECTS[13].id);
+  data=equiv(data,SUBJECTS[8].id);
   data=applyCommand(data,{type:'requirement',id:'pc',status:'en-curso'});
-  data=applyCommand(data,{type:'revert',subject:SUBJECTS[13].id});
+  data=applyCommand(data,{type:'revert',subject:SUBJECTS[8].id});
   assert.equal(data._otro_pc,'en-curso');
   assert.throws(() => applyCommand(data,{type:'requirement',id:'pc',status:'acreditado'}));
-  for(const m of SUBJECTS.slice(0,24)) data=equiv(data,m.id);
+  for(const m of SUBJECTS.slice(0,16)) data=equiv(data,m.id);
   data=applyCommand(data,{type:'requirement',id:'eps',status:'en-curso'});
   assert.equal(data._otro_eps,'en-curso');
 });
@@ -96,4 +100,39 @@ test('GitHub Pages paths and no destructive reset action',() => {
   assert.match(index,/apple-touch-icon/);
   assert.doesNotMatch(index,/maximum-scale|confirmReset|Restablecer|tg-token/);
   for(const file of ['app','state','actions','render']) assert.doesNotMatch(readFileSync(new URL('../js/'+file+'.js',import.meta.url),'utf8'),/location\.reload|resetState|confirmReset/);
+});
+
+test('English and historical grades/hours never enter assignment statistics',() => {
+  const data={
+    'Preliminares de Matemática':{e:'aprobada',nota:8,exs:[]},
+    'Inglés I':{e:'aprobada',nota:10,exs:[]},
+    'Inglés II':{e:'en-curso',nota:null,exs:[{id:'ex-english',tipo:'Final',fecha:'2026-12-01',nota:null}]},
+    'Base de Datos II':{e:'aprobada',nota:4,exs:[]},
+    'Proyecto Final II':{e:'en-curso',exs:[{tipo:'Final',fecha:'2026-12-01',nota:null}]},
+  };
+  const s=stats(data);
+  assert.equal(s.ap,1); assert.equal(s.hAp,60); assert.equal(s.prom,8); assert.equal(s.graded,1); assert.equal(s.cur,0);
+  assert.deepEqual(upcoming(data,'2026-11-01').map(ex=>ex.subjectId),['in2']);
+  assert.deepEqual(normalizeState(data)['Proyecto Final II'],data['Proyecto Final II']);
+});
+
+test('English gates match the three official terms, with no invented level prerequisites',() => {
+  let data=Object.fromEntries(SUBJECTS.map(m=>[m.n,{e:'aprobada',nota:8,exs:[]}]));
+  for(const m of SUBJECTS) {
+    const required=m.a===2&&m.c===2?'Inglés I':m.a===3&&m.c===1?'Inglés II':m.a===3&&m.c===2?'Inglés III':null;
+    assert.equal(bloqueoActivar(data,m.n),required?`Requiere ${required} acreditado para este cuatrimestre.`:null);
+  }
+  for(const m of LANGUAGES) assert.equal(bloqueoActivar({},m.n),null);
+  for(const m of LANGUAGES) data=equiv(data,m.id);
+  for(const m of SUBJECTS) assert.equal(bloqueoActivar(data,m.n),null);
+  assert.throws(()=>applyCommand(data,{type:'approve',subject:'bd2',grade:9}));
+});
+
+test('old imports preserve historical and unmapped entries verbatim and report conflicts',() => {
+  const data={'Base de Datos II':{e:'aprobada',nota:10,exs:[{id:'legacy-original',custom:[1,2]}]},'Nombre sin mapa':{e:'aprobada',nota:9,nested:{keep:true}},_otro_desconocido:{keep:true}};
+  assert.deepEqual(normalizeState(data,true),data);
+  assert.deepEqual(retainedRecords(data),[{key:'Base de Datos II',historical:true},{key:'Nombre sin mapa',historical:false},{key:'_otro_desconocido',historical:false}]);
+  const updated=equiv(data,'pre');
+  for(const key of Object.keys(data)) assert.deepEqual(updated[key],data[key]);
+  assert.equal(stats(updated).ap,1);
 });
