@@ -4,8 +4,10 @@ import assert from 'node:assert/strict';
 import {fileURLToPath} from 'node:url';
 import fs from 'node:fs/promises';
 const base='http://127.0.0.1:4173/mi-carrera/';
+export const QA_OUTPUT_DIR = new URL('../artifacts/qa/',import.meta.url);
 export async function capture(page,name) {
-  const path=fileURLToPath(new URL('../docs/'+name+'.png',import.meta.url));
+  await fs.mkdir(QA_OUTPUT_DIR,{recursive:true});
+  const path=fileURLToPath(new URL(name+'.png',QA_OUTPUT_DIR));
   await page.mouse.move(0,0);
   await page.evaluate(async() => { await Promise.allSettled(document.getAnimations().map(animation => animation.finished)); });
   const buffer=await page.screenshot({fullPage:true});
