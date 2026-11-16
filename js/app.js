@@ -1,111 +1,40 @@
-/**
- * app.js
- * Punto de entrada: inicialización, navegación entre páginas,
- * toggles de acordeón, recordatorios y funciones utilitarias.
- */
-
-// ── Utilidades ────────────────────────────────────────────────
-
-/** Convierte un nombre de materia en un ID válido para el DOM. */
-function eid(s) { return s.replace(/[^a-zA-Z0-9]/g, '_'); }
-
-/** Escapa comillas simples para usar el nombre en atributos onclick. */
-function esc(s) { return s.replace(/'/g, "\\'"); }
-
-/** Formatea una fecha ISO (YYYY-MM-DD) como DD/MM/YYYY. */
-function fmt(iso) {
-  if (!iso) return '';
-  const [y, m, d] = iso.split('-');
-  return `${d}/${m}/${y}`;
+import { subscribe, getState } from './state.js';
+import { SUBJECTS, ms } from './core.js';
+import { renderAll, renderMats, renderBackups, syncSubjectDetails } from './render.js';
+import { initActions } from './actions.js';
+import { hydrateIcons } from './ui.js';
+import { initVisualEffects } from './effects.js';
+const $=id => document.getElementById(id);
+let currentPage;
+const pageScroll = new Map();
+function navigate() {
+  if (location.hash === '#main') return;
+  const page=['inicio','materias','configuracion'].includes(location.hash.slice(1)) ? location.hash.slice(1) : 'inicio';
+  if (currentPage && currentPage !== page) pageScroll.set(currentPage,window.scrollY);
+  document.querySelectorAll('.page').forEach(el => { el.hidden=el.id !== 'page-'+page; el.classList.toggle('active',!el.hidden); });
+  document.querySelectorAll('.tab').forEach(el => { const active=el.dataset.page === page; el.classList.toggle('active',active); if (active) el.setAttribute('aria-current','page'); else el.removeAttribute('aria-current'); });
+  if (page === 'configuracion') renderBackups();
+  if (currentPage !== page) window.scrollTo({top:pageScroll.get(page) || 0,behavior:'instant'});
+  currentPage = page;
 }
-
-/** Devuelve la clase CSS de color según la nota. */
-function notaCls(n) {
-  return n >= 7 ? 'nota-green' : n >= 4 ? 'nota-yellow' : 'nota-red';
-}
-
-// ── Toast ─────────────────────────────────────────────────────
-
-let _toastTimer;
-
-function toast(msg) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.add('show');
-  clearTimeout(_toastTimer);
-  _toastTimer = setTimeout(() => el.classList.remove('show'), 2500);
-}
-
-// ── Navegación ────────────────────────────────────────────────
-
-function showPage(id, btn) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
-  document.getElementById('page-' + id).classList.add('active');
-  btn.classList.add('active');
-}
-
-// ── Acordeones ────────────────────────────────────────────────
-
-function toggleYear(a) {
-  document.getElementById('yb-' + a)?.classList.toggle('open');
-}
-
-function toggleMat(nombre) {
-  const body = document.getElementById('mb-' + eid(nombre));
-  body.classList.toggle('open');
-  const chevron = document.getElementById('mch-' + eid(nombre));
-  if (chevron) chevron.style.transform = body.classList.contains('open') ? 'rotate(180deg)' : '';
-}
-
-function toggleReq(id) {
-  const body    = document.getElementById('reqb-' + id);
-  const chevron = document.getElementById('reqch-' + id);
-  body.classList.toggle('open');
-  if (chevron) chevron.style.transform = body.classList.contains('open') ? 'rotate(180deg)' : '';
-}
-
-// ── Recordatorios por Telegram ────────────────────────────────
-
-/**
- * Se ejecuta una vez por día (al abrir la app).
- * Envía mensaje a Telegram si hay examen hoy o mañana.
- */
-function checkRecordatorios() {
-  const hoy = new Date(); hoy.setHours(0, 0, 0, 0);
-  const hoyStr = hoy.toISOString().slice(0, 10);
-  const KEY = 'ap2_last_chk';
-  if (localStorage.getItem(KEY) === hoyStr) return; // ya se chequeó hoy
-  localStorage.setItem(KEY, hoyStr);
-
-  PLAN.forEach(m => {
-    const s = ms(m.n);
-    (s.exs || []).forEach(ex => {
-      if (!ex.fecha || ex.nota) return;
-      const f = new Date(ex.fecha + 'T00:00:00');
-      const d = Math.round((f - hoy) / 86400000);
-      if (d === 0) sendTG(`📝 Hoy tenés ${ex.tipo} de ${m.n}. Mucho ánimo.`);
-      if (d === 1) sendTG(`📅 Mañana tenés ${ex.tipo} de ${m.n}. ¡A repasar!`);
-    });
-  });
-}
-
-// ── Inicialización ────────────────────────────────────────────
-
-function init() {
-  // Renderizar vistas
-  renderDash();
+function filter() {
+  const open = [...document.querySelectorAll('#mat-list details[open]')].map(el => el.id);
   renderMats();
-
-  // Restaurar campos de Telegram si ya estaban guardados
-  const tgToken  = localStorage.getItem('ap2_tgt');
-  const tgChatId = localStorage.getItem('ap2_tgc');
-  if (tgToken)  document.getElementById('tg-token').value  = tgToken;
-  if (tgChatId) document.getElementById('tg-chatid').value = tgChatId;
-  updTGBadge();
-
-  // Recordatorios (solo si Telegram está configurado)
-  checkRecordatorios();
+  open.forEach(id => { const el=$(id); if (el) el.open=true; });
+  syncSubjectDetails();
 }
-
-init();
+hydrateIcons(); initActions();
+$('mat-list').addEventListener('toggle',event => {
+  if (event.target.matches('.subject')) syncSubjectDetails();
+},true);
+window.matchMedia('(min-width: 1051px)').addEventListener('change',syncSubjectDetails);
+subscribe(renderAll); renderAll();
+const initialSubject = SUBJECTS.find(m => ms(getState(),m.n).e === 'en-curso') || SUBJECTS.find(m => ms(getState(),m.n).e !== 'aprobada') || SUBJECTS.at(-1);
+$('year-' + (initialSubject.n.startsWith('Inglés') ? 'ing' : initialSubject.a)).open=true;
+$('today-label').textContent=new Intl.DateTimeFormat('es-AR',{weekday:'long',day:'numeric',month:'long'}).format(new Date());
+$('search').addEventListener('input',filter);
+$('status-filter').addEventListener('change',filter);
+window.addEventListener('hashchange',navigate); navigate();
+// Old browser-held Telegram secrets are obsolete. Academic state is untouched.
+try { localStorage.removeItem('ap2_tgt'); localStorage.removeItem('ap2_tgc'); } catch { /* State reader already reports unavailable storage. */ }
+initVisualEffects();

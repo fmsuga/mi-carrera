@@ -1,0 +1,12 @@
+# Keep the existing GitHub Pages build from main / root.
+# Development tools and review artifacts stay in Git, outside the published site.
+exclude:
+  - README.md
+  - package.json
+  - package-lock.json
+  - docs
+  - scripts
+  - tests
+  - node_modules
+  - .playwright-mcp
+  - assets/fonts/README.md

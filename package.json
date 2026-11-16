@@ -1,0 +1,6 @@
+{
+  "name": "mi-carrera",
+  "private": true,
+  "type": "module",
+  "scripts": { "test": "node --test tests/core.test.js tests/storage.test.js tests/milestones.test.js", "dev": "node scripts/serve.mjs" }
+}

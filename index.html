@@ -2,147 +2,71 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-  <title>Mi Carrera · Analista Programador</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0c1422">
+  <meta name="description" content="Tu progreso en Analista Programador: materias, correlativas, notas y próximos exámenes.">
+  <title>Analista Programador · Mi carrera</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="./assets/favicon-32.png">
+  <link rel="icon" type="image/svg+xml" sizes="any" href="./assets/favicon.svg">
+  <link rel="apple-touch-icon" sizes="180x180" href="./assets/apple-touch-icon.png">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="preload" href="./assets/fonts/InterVariable.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="./assets/fonts/SourceSerif4Variable.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="./css/styles.css">
 </head>
 <body>
-
-<header class="header">
-  <div class="header-brand">
-    <div class="brand-crest">A</div>
-    Mi Carrera
-  </div>
-  <button class="tab active" onclick="showPage('dashboard', this)">Inicio</button>
-  <button class="tab"        onclick="showPage('materias',  this)">Materias</button>
-  <button class="tab"        onclick="showPage('config',    this)">Config</button>
-</header>
-
-<main>
-
-  <!-- ── Dashboard ──────────────────────────────────────────── -->
-  <div class="page active" id="page-dashboard">
-
-    <div class="hero">
-      <div class="hero-label">Promedio general</div>
-      <div class="hero-promedio" id="hero-promedio">—<small> / 10</small></div>
-      <div class="hero-sub"      id="hero-sub">Cargá tu primera materia aprobada</div>
-      <div class="prog-row">
-        <div class="prog-item">
-          <div class="prog-labels"><span>Materias</span><strong id="prog-mat-lbl">0 / 0</strong></div>
-          <div class="prog-track"><div class="prog-fill" id="prog-mat" style="width:0%"></div></div>
-        </div>
-        <div class="prog-item">
-          <div class="prog-labels"><span>Horas</span><strong id="prog-ch-lbl">0h / 0h</strong></div>
-          <div class="prog-track"><div class="prog-fill" id="prog-ch"  style="width:0%"></div></div>
-        </div>
-      </div>
+  <a class="skip-link" href="#main">Ir al contenido</a>
+  <header class="header">
+    <div class="header-inner">
+      <a class="brand" href="#inicio" aria-label="Analista Programador, inicio"><img src="./assets/favicon.svg" width="38" height="38" alt=""><span>Analista Programador<small>MI CARRERA · UNLPam</small></span></a>
+      <nav aria-label="Navegación principal">
+        <a class="tab active" href="#inicio" data-page="inicio" aria-current="page"><span data-icon="grid"></span>Inicio</a>
+        <a class="tab" href="#materias" data-page="materias"><span data-icon="book"></span>Materias</a>
+        <a class="tab" href="#configuracion" data-page="configuracion"><span data-icon="settings"></span>Configuración</a>
+      </nav>
     </div>
-
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-num green"  id="s-aprobadas">0</div>
-        <div class="stat-lbl">Aprobadas</div>
+  </header>
+  <main id="main" tabindex="-1">
+    <div id="data-warning" class="notice danger" role="alert" hidden></div>
+    <section id="page-inicio" class="page active" aria-label="Inicio">
+      <div class="page-heading"><div><h1>Resumen académico</h1><p>Tu progreso, tus próximos exámenes y los hitos del plan.</p></div><span class="date-label" id="today-label"></span></div>
+      <div id="dashboard"></div>
+    </section>
+    <section id="page-materias" class="page" aria-label="Materias" hidden>
+      <div class="page-heading"><div><div class="eyebrow">PLAN DE ESTUDIOS</div><h1>Materias</h1><p>Consultá correlativas y llevá al día tus cursadas, notas y exámenes.</p></div><span class="plan-total" id="plan-count"></span></div>
+      <div class="toolbar panel"><div class="search-field"><span data-icon="search"></span><label class="sr-only" for="search">Buscar materia por nombre</label><input id="search" type="search" placeholder="Buscar una materia…" autocomplete="off"></div><div class="filter-field"><label for="status-filter">Estado</label><select id="status-filter"><option value="all">Todos los estados</option><option value="aprobada">Aprobadas</option><option value="en-curso">En curso</option><option value="pendiente">Pendientes</option><option value="desaprobada">Desaprobadas</option><option value="equivalencia">Por equivalencia</option></select></div></div>
+      <p class="result-count" id="result-count" aria-live="polite" hidden></p>
+      <div id="mat-list"></div>
+    </section>
+    <section id="page-configuracion" class="page" aria-label="Configuración" hidden>
+      <div class="page-heading"><div><div class="eyebrow">DATOS Y RESPALDOS</div><h1>Configuración</h1><p>Tus datos, siempre bajo tu control.</p></div></div>
+      <div class="config-grid">
+        <article class="panel config-card">
+          <h2>Gestioná tus datos</h2>
+          <p class="section-description">Materias, notas, equivalencias, exámenes y requisitos, en una copia completa.</p>
+          <div class="data-operation">
+            <div><h3>Exportar una copia</h3><p>Descargá tu información en formato JSON para conservarla fuera del navegador.</p></div>
+            <button class="btn primary" data-action="export"><span data-icon="download"></span>Exportar JSON</button>
+          </div>
+          <div class="data-operation">
+            <div><h3>Importar un backup</h3><p>Revisamos el archivo y pedimos tu confirmación antes de sustituir registros. Primero guardamos una copia del estado anterior.</p></div>
+            <button class="btn" data-action="import"><span data-icon="upload"></span>Elegir archivo</button>
+            <input type="file" id="import-file" accept=".json,application/json" hidden>
+          </div>
+          <div class="storage-note"><span data-icon="shield"></span><p><strong>Guardado en este navegador</strong>Conservá una copia externa antes de cambiar de dispositivo o borrar el almacenamiento del navegador.</p></div>
+        </article>
+        <article class="panel backup-history">
+          <h2>Copias de seguridad</h2>
+          <p class="section-description">Estados anteriores guardados antes de una importación o migración. Podés descargarlos para recuperarlos.</p>
+          <div id="backup-list"></div>
+        </article>
       </div>
-      <div class="stat-card">
-        <div class="stat-num yellow" id="s-cursando">0</div>
-        <div class="stat-lbl">En curso</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-num blue"   id="s-pendientes">0</div>
-        <div class="stat-lbl">Pendientes</div>
-      </div>
-    </div>
-
-    <div id="proximos-wrap"></div>
-
-  </div>
-
-  <!-- ── Materias ───────────────────────────────────────────── -->
-  <div class="page" id="page-materias">
-    <div id="mat-list"></div>
-  </div>
-
-  <!-- ── Config ─────────────────────────────────────────────── -->
-  <div class="page" id="page-config">
-
-    <div class="config-section">
-      <div class="config-section-title">Notificaciones por Telegram</div>
-      <div class="config-section-desc">
-        La aplicación puede enviarte un mensaje el día anterior y el día de cada examen.
-        Requiere un bot propio de Telegram.
-      </div>
-      <div class="tg-status tg-disconnected" id="tg-badge">
-        <span class="tg-status-dot"></span> Sin configurar
-      </div>
-      <div class="field-group">
-        <label class="field-label">Token del bot</label>
-        <input class="field-input" id="tg-token" type="password"
-               placeholder="123456789:AAFxxx..." autocomplete="off">
-      </div>
-      <div class="field-group">
-        <label class="field-label">Chat ID</label>
-        <input class="field-input" id="tg-chatid" placeholder="Número de chat">
-      </div>
-      <div class="config-btns">
-        <button class="btn primary" onclick="saveTG()">Guardar</button>
-        <button class="btn"         onclick="testTG()">Enviar mensaje de prueba</button>
-        <button class="btn danger"  onclick="clearTG()">Borrar credenciales</button>
-      </div>
-    </div>
-
-    <div class="config-section">
-      <div class="config-section-title">Copia de seguridad</div>
-      <div class="config-section-desc">
-        Exportá tus datos como JSON para hacer backup o transferirlos a otro dispositivo.
-        Al importar, los datos actuales se reemplazan por completo.
-      </div>
-      <div class="config-btns">
-        <button class="btn" onclick="exportData()">Exportar datos</button>
-        <button class="btn" onclick="document.getElementById('imp').click()">Importar datos</button>
-        <input type="file" id="imp" accept=".json" style="display:none" onchange="importData(event)">
-      </div>
-    </div>
-
-    <div class="config-section">
-      <div class="config-section-title danger-title">Restablecer</div>
-      <div class="config-section-desc">
-        Elimina permanentemente todas las notas, estados y exámenes registrados.
-        Esta acción no se puede deshacer.
-      </div>
-      <button class="btn danger" onclick="confirmReset()">Borrar todos los datos</button>
-    </div>
-
-  </div>
-
-</main>
-
-<!-- ── Modal global ────────────────────────────────────────── -->
-<div class="modal-bg" id="modal-bg" onclick="closeOnBg(event)">
-  <div class="modal">
-    <div class="modal-title" id="modal-title"></div>
-    <div id="modal-body"></div>
-    <div class="modal-foot" id="modal-foot"></div>
-  </div>
-</div>
-
-<div class="toast" id="toast"></div>
-
-<!--
-  Orden de carga importante:
-  1. plan.js    → datos (PLAN, OTROS, TOTAL_H, TOTAL_M)
-  2. state.js   → estado y persistencia (depende de PLAN)
-  3. render.js  → DOM (depende de state + plan)
-  4. actions.js → lógica (depende de render + state + plan)
-  5. app.js     → init, nav, utils (depende de todo lo anterior)
--->
-<script src="js/plan.js"></script>
-<script src="js/state.js"></script>
-<script src="js/render.js"></script>
-<script src="js/actions.js"></script>
-<script src="js/app.js"></script>
-
+    </section>
+    <footer class="footer"><span>Datos guardados en este navegador</span><a href="#configuracion">Copias de seguridad</a></footer>
+  </main>
+  <dialog id="modal" aria-labelledby="modal-title"><form id="modal-form"><div class="modal-heading"><h2 id="modal-title"></h2><button type="button" class="icon-btn" id="modal-close" aria-label="Cerrar diálogo"><span data-icon="close"></span></button></div><div id="modal-body"></div><p id="modal-error" class="form-error" role="alert"></p><div class="modal-foot"><button type="button" class="btn" id="modal-cancel">Cancelar</button><button type="submit" class="btn primary" id="modal-submit">Guardar</button></div></form></dialog>
+  <aside class="milestone-notice" id="milestone-notice" role="status" aria-live="polite" aria-atomic="true" hidden><span class="milestone-notice-icon" aria-hidden="true"></span><div><strong></strong><p></p></div></aside>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script type="module" src="./js/app.js"></script>
 </body>
 </html>
