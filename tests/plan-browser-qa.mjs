@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import {capture} from './browser-qa.mjs';
 const base='http://127.0.0.1:4173/mi-carrera/';
 export async function runPlanQA(page) {
   const results=[],errors=[];
@@ -60,6 +61,20 @@ export async function runPlanQA(page) {
   const imported=await page.evaluate(()=>({data:JSON.parse(localStorage.getItem('ap2_state')),backups:Object.keys(localStorage).filter(k=>k.includes('pre_import')).map(k=>localStorage.getItem(k))}));
   check(JSON.stringify(imported.data)===JSON.stringify(migration.saved)&&imported.backups.includes(beforeImport),'Importar V1 conserva todos sus registros, con copia exacta del estado anterior');
   check(await page.locator('#year-4').count()===0&&await page.locator('#subject-bd2').count()===0,'Importar un backup antiguo no reincorpora el cuarto año al plan');
+  const stored=await page.evaluate(()=>localStorage.getItem('ap2_state'));
+  await page.waitForFunction(()=>getComputedStyle(document.getElementById('toast')).opacity==='0');
+  for(const [width,name] of [[1440,'desktop'],[390,'mobile']]) {
+    await page.setViewportSize({width,height:1000});await page.goto(base+'#materias');
+    await page.locator('#mat-list details').evaluateAll(els=>els.forEach(el=>el.open=false));
+    await page.locator('#year-ing').evaluate(el=>el.open=true);await page.locator('#subject-in2').evaluate(el=>el.open=true);
+    await page.waitForFunction(w=>document.getElementById('detail-in2').parentElement.classList.contains(w>=1051?'year-subject-details':'subject'),width);
+    await page.evaluate(()=>window.scrollTo(0,0));await capture(page,'requisitos-'+name);
+    if(width===1440) {
+      await page.goto(base+'#configuracion');await page.locator('#retained-records details').evaluate(el=>el.open=true);
+      await page.evaluate(()=>window.scrollTo(0,0));await capture(page,'registros-conservados');
+    }
+  }
+  check(await page.evaluate(()=>localStorage.getItem('ap2_state'))===stored,'Consultar requisitos y registros conservados en desktop y mobile no modifica sus datos');
   check(errors.length===0,'Sin errores de navegador en compatibilidad, exportación e importación conservadoras');
   return {checks:results.length,results,errors};
 }

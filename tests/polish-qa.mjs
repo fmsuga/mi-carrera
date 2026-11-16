@@ -34,9 +34,14 @@ export async function runVisualPolishQA(page) {
   await page.getByRole('link',{name:'Materias',exact:true}).click();
   await page.getByRole('link',{name:'Inicio',exact:true}).click();
   check(await page.evaluate(() => window.__motionCalls.filter(c => c.key === 'career-ring').length) === ringsBefore,'Navegar entre vistas no reinicia el anillo sin cambios de progreso');
-  check(await page.locator('#progress-info > p').isHidden(),'La aclaración oficial se presenta de forma discreta');
-  await page.locator('#progress-info-summary').click();
-  check(await page.locator('#progress-info > p').isVisible() && (await page.locator('#progress-info > p').innerText()).includes('no constituye certificación oficial'),'La explicación del cálculo y su alcance están disponibles por teclado o clic');
+  check(await page.locator('.academic-hero .average-note,.academic-hero .average-explanation,#progress-info,.hero-context,.hero-footer').count()===0,'Hero compacta sin explicaciones, mensajes de contexto ni desplegable');
+  check(await page.locator('#dashboard').evaluate(el=>[...el.children].map(c=>c.classList[1]||c.classList[0]).join(',')==='academic-hero,agenda-card,year-overview,milestones-card'),'Orden: hero, próximos exámenes, avance por año y hitos');
+  check(await page.locator('#dashboard-milestones').evaluate(el=>!el.open),'Hitos del plan comienza plegado');
+  await page.locator('#dashboard-milestones-summary').focus();await page.keyboard.press('Space');
+  await page.waitForFunction(()=>document.getElementById('dashboard-milestones').open);
+  check(await page.locator('#dashboard-milestones .milestone').first().isVisible(),'Los hitos se despliegan con teclado');
+  await page.waitForFunction(()=>document.getAnimations().length===0);
+  check((await page.locator('#dashboard-milestones .milestone-status').first().innerText()).includes('8 / 9'),'El acordeón muestra el nuevo umbral de nueve asignaturas');
 
   const watcher=await page.context().newPage(); await watcher.goto(base);
   await page.bringToFront();
@@ -52,8 +57,8 @@ export async function runVisualPolishQA(page) {
   await watcher.waitForFunction(() => document.querySelector('.hero-subjects .hero-metric-value').textContent.trim() === '9 / 22');
   check(await watcher.locator('#milestone-notice').isHidden(),'La celebración se muestra únicamente en la pestaña que realizó la aprobación');
   await watcher.close();
-  check(await page.locator('#progress-info').evaluate(el => el.open),'La explicación abierta conserva su estado tras actualizar datos');
-  await page.locator('#progress-info').evaluate(el => el.open=false);
+  check(await page.locator('#dashboard-milestones').evaluate(el => el.open),'El acordeón de hitos conserva su apertura tras actualizar datos');
+  await page.locator('#dashboard-milestones').evaluate(el => el.open=false);
   await page.getByRole('link',{name:'Inicio',exact:true}).click();
   await page.evaluate(() => window.scrollTo(0,0));
   await capture(page,'hito-40-desktop');

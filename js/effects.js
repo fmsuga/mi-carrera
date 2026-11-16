@@ -53,6 +53,7 @@ export function initVisualEffects() {
   });
   window.addEventListener('hashchange',animateIndicators);
   document.getElementById('mat-list').addEventListener('toggle',animateIndicators,true);
+  document.getElementById('dashboard').addEventListener('toggle',animateIndicators,true);
   reduced.addEventListener('change',() => { if (reduced.matches) cancelMotion(); });
   document.addEventListener('visibilitychange',() => { if (document.hidden) cancelMotion(); });
 }

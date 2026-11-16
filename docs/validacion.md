@@ -1,38 +1,21 @@
-# Verificación de la Entrega 1
+# Verificación del plan corregido
 
-Fecha: 16 de noviembre de 2026. Entorno: Node.js 24 y Microsoft Edge con Playwright, en un contexto aislado.
+Entorno: Node.js 24 y Microsoft Edge con Playwright, exclusivamente en contextos locales aislados. No se abrió ni modificó el perfil del sitio publicado.
 
-- `npm test`: **28 pruebas aprobadas**, sin fallos.
-- `node scripts/run-browser-qa.mjs`: **76 comprobaciones aprobadas**, sin errores JavaScript. Resultado detallado: [browser-qa.json](browser-qa.json).
-- Responsive: Inicio, Materias y Configuración a **1920, 1440, 1280, 768 y 390 px**, sin desbordes horizontales.
-- Revisión visual: dashboard, materias y configuración en desktop y mobile, más favicon rasterizado a 16 px.
-- Migración: copia exacta anterior y agregado determinista de IDs; notas, propiedades y requisitos se conservan. Se probó idempotencia y bloqueo seguro ante fallos.
-- Persistencia: cambios disponibles al reabrir la página y sincronización entre dos pestañas reales; ninguna prueba accedió al origen publicado del usuario.
-- Compatibilidad final V1→V2: se ejecutó el código original de `main` con almacenamiento sintético y se abrió su resultado directamente en V2, sin importar archivos. Se conservaron todas las materias, estados, notas, exámenes, campos adicionales y requisitos; solo se agregaron IDs de examen, con copia exacta previa. Una segunda apertura no volvió a migrar. El plan original se comparó completo, sin cambios de nombres, horas o correlativas.
-- Perfil vacío: la primera apertura conserva ausente `ap2_state` y muestra 0 de 33; no genera datos de prueba ni escribe un estado inicial vacío. No se accedió al perfil personal del navegador.
-- Actualizaciones inmediatas: promedio, porcentajes, próximos exámenes, correlativas y requisitos de 40%/70%, incluidos desbloqueo y reversión.
-- Importación: rechazo de esquemas inválidos; confirmación explícita obligatoria; copia previa descargable; fallo de cuota no sustituye registros.
-- Accesibilidad: campos identificados, navegación por teclado, foco dentro del diálogo, Escape para cerrar y restauración del foco.
-- Recursos: respuestas HTTP 200 para SVG, PNG, iconos móviles, manifest, CSS y módulos bajo `/mi-carrera/`. Navegación por fragmentos compatible con hosting estático.
-- Revisión visual adicional: sin recuadros numerados, abreviaturas, barras laterales o pills redundantes; cuatrimestres alineados en desktop y buscador mobile con ancho útil.
-- Hero card: una sola superficie sin tarjetas internas; porcentaje, promedio, materias y horas verificados con datos conocidos y contenidos dentro de la card en los cinco anchos.
-- Acabados: degradado del anillo y luz ambiental estática; entradas finitas de anillo y barras que terminan en el valor real y no se reinician por navegación o cambios ajenos al progreso. Ningún efecto modifica los registros académicos.
-- Movimiento reducido: sin entradas, transiciones ni animación de la celebración; porcentaje real visible inmediatamente. Se verificó en desktop y mobile.
-- Hitos: cruces reales de 40% y 70% mediante aprobación, aviso breve sin bloqueo, historial independiente persistido y celebración únicamente en la pestaña de origen. Recargar, revertir y volver a cruzar, importar o migrar no repite ni dispara celebraciones.
-- Historial de hitos: pruebas de equivalencias, umbrales exactos, requisitos históricos, coordinación entre pestañas, cuota y registro ilegible. Un fallo de este registro de presentación no afecta a los datos académicos.
-- Header sin porcentaje duplicado; explicación del cálculo y ausencia de certificación oficial accesibles en un desplegable que conserva su apertura después de actualizar el estado.
-- Ajustes puntuales: detalle desktop a ancho completo sin alterar las alturas de los cuatrimestres; detalle inline y grupos de acciones separados en mobile; contador condicional; título Copias de seguridad.
-- Navegación: recupera la posición de lectura por vista y abre el año con cursadas activas.
-- Fuentes locales cargadas correctamente; ninguna solicitud de la aplicación a servicios externos.
-- Revisión de publicación: sin credenciales detectadas ni archivos temporales versionados; las únicas fuentes de datos académicos de ejecución son `ap2_state` y las acciones explícitas del usuario. Los fixtures permanecen en pruebas, excluidas del sitio servido.
-- `git diff --check`: sin errores de formato.
+- **35 pruebas aprobadas** de dominio, almacenamiento e historial de hitos.
+- **99 comprobaciones de navegador aprobadas**, sin errores JavaScript ni solicitudes externas. [Resultado detallado](browser-qa.json).
+- Plan activo: 22 asignaturas, 2.044 horas y tres años de 7, 7 y 8 asignaturas. Inglés se mantiene como tres requisitos independientes; PC y EPS requieren nueve y dieciséis aprobadas. Correlativas y condiciones contrastadas con el PDF y la página oficial. [Fuente y discrepancia de horas](plan-2025.md).
+- V1: reconocimiento automático, copia exacta previa y agregado de IDs solo a exámenes editables que no los tenían. Notas, estados, campos adicionales, Inglés y registros históricos preservados. Reapertura idempotente.
+- V2: recategorización sin cambiar claves, IDs ni bytes del estado con IDs existentes. Un perfil vacío conserva ausente `ap2_state`; no recibe muestras ni un estado inicial vacío.
+- Importación y exportación: incluyen Inglés, históricos y registros sin correspondencia. Se verificó la copia exacta previa, la confirmación explícita y que importar V1 no reincorpora el cuarto año al plan. Los nombres desconocidos se escapan al mostrarlos y los registros opacos no se transforman.
+- Fallos de JSON, validación o cuota: original intacto; una copia previa fallida bloquea la sustitución. Ningún error de persistencia publica una operación exitosa.
+- Equivalencias, promedio y horas: cálculo solo con asignaturas activas. Sin nota, la equivalencia suma asignatura y horas pero no divisor de promedio. Cambiar notas de Inglés no altera el resumen de asignaturas.
+- Exámenes: edición y calificación conservan IDs; reversión conserva sus registros. Inglés participa en la agenda; históricos ajenos al plan quedan fuera. Promedio, bloqueos, porcentajes y próximos exámenes se actualizan sin recargar y se sincronizan entre pestañas.
+- Hitos: celebración breve tras un cruce real de nueve o dieciséis aprobadas; solo en la pestaña de origen, una vez por navegador. Recargar, importar, migrar, recategorizar o volver a cruzar un hito registrado no lo celebra.
+- Accesibilidad: acordeón nativo de hitos con teclado, foco y apertura conservada; diálogos con Escape y foco contenido; entradas finitas y cancelación con movimiento reducido.
+- Responsive: las tres vistas a 1920, 1440, 1280, 768, 390, 360 y 320 px, sin desbordes. Hero de hasta 260 px en desktop y 340 px en mobile; el caso de 100% y promedio 10 conserva sus textos dentro de la card a 320 px.
+- Recursos: favicon SVG/PNG, accesos móviles, manifest, tipografías y módulos responden 200 bajo `/mi-carrera/`.
 
-Las capturas contienen **datos de prueba**, generados exclusivamente por el runner; la aplicación no incorpora datos ficticios ni estados precargados.
+Las [19 capturas](revision-visual.md) contienen exclusivamente datos de prueba. Se revisaron Inicio desktop/mobile, hitos abiertos, requisitos de Inglés y conservación de registros. No se modificó el README ni se configuraron servicios externos.
 
-Verificación final previa a la publicación autorizada: las rutas reproducen `/mi-carrera/` localmente. Se confirmó que GitHub Pages conserva la fuente `main`, raíz, y la URL `https://fmsuga.github.io/mi-carrera/`. Las pruebas, scripts y capturas se excluyen del sitio servido mediante `_config.yml` sin cambiar el mecanismo de Pages.
-
-No se implementaron ni probaron backend, autenticación remota, webhook, comandos de Telegram o avisos programados. La Entrega 2 continúa completamente en standby; su evaluación previa se conserva.
-
-Las capturas se actualizaron a 1920, 1440, 1280 y 390 px. El diseño quedó aprobado por el propietario; no se realizaron más cambios estéticos para publicar.
-
-La estructura aceptada de Inicio se conserva. Se regeneraron las doce capturas principales, incluido el header actualizado en Materias y Configuración. Se agregaron dos ejemplos de celebraciones con datos de prueba específicos; no son estados precargados ni datos del sitio publicado.
+Trabajo en una rama nueva desde main, con commits separados. Sin push, merge ni publicación; la versión publicada queda intacta hasta revisión del propietario. Telegram y Cloudflare permanecen en standby.
