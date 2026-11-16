@@ -59,12 +59,14 @@ Se incluyen Inter y Source Serif 4 como archivos locales con sus licencias. La a
 
 ## Estado de entregas
 
-Entrega 1 con funcionalidad local implementada y nueva iteración visual pendiente de revisión del propietario: dashboard, búsqueda y filtros, equivalencias, notas, edición y eliminación de exámenes, actualizaciones completas, protección de almacenamiento, importación y exportación, favicon y experiencia responsive.
+Entrega 1 con diseño aprobado por el propietario y funcionalidad local verificada: dashboard, búsqueda y filtros, equivalencias, notas, edición y eliminación de exámenes, actualizaciones completas, protección de almacenamiento, importación y exportación, favicon y experiencia responsive.
 
 Entrega 2 completamente en standby por decisión del propietario. La arquitectura ya está evaluada y documentada; no se avanza con backend, base compartida, Telegram ni cambios de hosting. No hay backend desplegado, autenticación, conexión compartida, webhook ni recordatorios operativos. Se retiró la antigua integración que almacenaba tokens en el cliente y solo notificaba con la web abierta. Al iniciar esta versión se eliminan exclusivamente las claves obsoletas `ap2_tgt` y `ap2_tgc`; `ap2_state` y los backups se preservan. La evaluación solicitada está en [docs/arquitectura-entrega-2.md](docs/arquitectura-entrega-2.md).
 
-## Publicación futura
+## Publicación en GitHub Pages
 
 Este checkout funciona como sitio estático desde la raíz, con rutas relativas. No necesita build ni servidor de producción. La navegación usa fragmentos (`#inicio`, `#materias`, `#configuracion`) y no depende de reglas de reescritura.
 
-No se ha cambiado la configuración de GitHub Pages ni se ha publicado esta rama. Antes de una publicación futura se debe revisar el diff y mantener el mismo origen de GitHub Pages para conservar el acceso al almacenamiento existente. Cambiar de dominio requiere una migración voluntaria verificada; el navegador no comparte `localStorage` entre dominios.
+Se conserva el mecanismo existente: GitHub Pages construye desde `main`, directorio raíz, y publica en `https://fmsuga.github.io/mi-carrera/`. `_config.yml` excluye pruebas, scripts y documentación de revisión del sitio servido; permanecen en el repositorio. La integración usa un merge commit para conservar todos los commits de la rama V2.
+
+Se mantienen el origen y la clave `ap2_state` para reconocer automáticamente el almacenamiento existente. La primera apertura solo agrega IDs faltantes a exámenes antiguos, con una copia exacta previa; no importa backups ni inicializa datos de prueba. Cambiar de dominio requiere una migración voluntaria verificada; el navegador no comparte `localStorage` entre dominios. La verificación automatizada usa contextos aislados y no accede al perfil del usuario.

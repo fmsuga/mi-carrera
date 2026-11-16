@@ -1,6 +1,6 @@
 # Revisión visual · Entrega 1
 
-16 de noviembre de 2026. Iteración lista para revisión del propietario; no publicada.
+16 de noviembre de 2026. Diseño aprobado por el propietario; capturas de la verificación previa a la publicación.
 
 ## Criterio aplicado
 
@@ -71,4 +71,4 @@ Estos dos ejemplos muestran cruces realizados mediante la interfaz en contextos 
 - Sin errores JavaScript ni solicitudes a servicios externos.
 - Recursos y tipografías disponibles bajo `/mi-carrera/`.
 
-El objetivo de esta entrega es revisar el resultado visual y decidir si hace falta otra ronda. No se ha hecho push, despliegue, migración de hosting ni configuración de backend.
+El propietario aprobó esta iteración sin más cambios estéticos y autorizó su publicación mediante el mecanismo existente de GitHub Pages. La Entrega 2 permanece en standby, sin cambios de hosting ni configuración de backend.

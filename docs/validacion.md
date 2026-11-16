@@ -8,6 +8,8 @@ Fecha: 16 de noviembre de 2026. Entorno: Node.js 24 y Microsoft Edge con Playwri
 - Revisión visual: dashboard, materias y configuración en desktop y mobile, más favicon rasterizado a 16 px.
 - Migración: copia exacta anterior y agregado determinista de IDs; notas, propiedades y requisitos se conservan. Se probó idempotencia y bloqueo seguro ante fallos.
 - Persistencia: cambios disponibles al reabrir la página y sincronización entre dos pestañas reales; ninguna prueba accedió al origen publicado del usuario.
+- Compatibilidad final V1→V2: se ejecutó el código original de `main` con almacenamiento sintético y se abrió su resultado directamente en V2, sin importar archivos. Se conservaron todas las materias, estados, notas, exámenes, campos adicionales y requisitos; solo se agregaron IDs de examen, con copia exacta previa. Una segunda apertura no volvió a migrar. El plan original se comparó completo, sin cambios de nombres, horas o correlativas.
+- Perfil vacío: la primera apertura conserva ausente `ap2_state` y muestra 0 de 33; no genera datos de prueba ni escribe un estado inicial vacío. No se accedió al perfil personal del navegador.
 - Actualizaciones inmediatas: promedio, porcentajes, próximos exámenes, correlativas y requisitos de 40%/70%, incluidos desbloqueo y reversión.
 - Importación: rechazo de esquemas inválidos; confirmación explícita obligatoria; copia previa descargable; fallo de cuota no sustituye registros.
 - Accesibilidad: campos identificados, navegación por teclado, foco dentro del diálogo, Escape para cerrar y restauración del foco.
@@ -22,14 +24,15 @@ Fecha: 16 de noviembre de 2026. Entorno: Node.js 24 y Microsoft Edge con Playwri
 - Ajustes puntuales: detalle desktop a ancho completo sin alterar las alturas de los cuatrimestres; detalle inline y grupos de acciones separados en mobile; contador condicional; título Copias de seguridad.
 - Navegación: recupera la posición de lectura por vista y abre el año con cursadas activas.
 - Fuentes locales cargadas correctamente; ninguna solicitud de la aplicación a servicios externos.
+- Revisión de publicación: sin credenciales detectadas ni archivos temporales versionados; las únicas fuentes de datos académicos de ejecución son `ap2_state` y las acciones explícitas del usuario. Los fixtures permanecen en pruebas, excluidas del sitio servido.
 - `git diff --check`: sin errores de formato.
 
 Las capturas contienen **datos de prueba**, generados exclusivamente por el runner; la aplicación no incorpora datos ficticios ni estados precargados.
 
-No se publicó en GitHub Pages: la comprobación de rutas reproduce el prefijo localmente. La verificación de una nueva publicación real queda para cuando el propietario autorice publicar.
+Verificación final previa a la publicación autorizada: las rutas reproducen `/mi-carrera/` localmente. Se confirmó que GitHub Pages conserva la fuente `main`, raíz, y la URL `https://fmsuga.github.io/mi-carrera/`. Las pruebas, scripts y capturas se excluyen del sitio servido mediante `_config.yml` sin cambiar el mecanismo de Pages.
 
 No se implementaron ni probaron backend, autenticación remota, webhook, comandos de Telegram o avisos programados. La Entrega 2 continúa completamente en standby; su evaluación previa se conserva.
 
-Las capturas se actualizaron para esta iteración visual a 1920, 1440, 1280 y 390 px. La entrega queda preparada para revisión del propietario, sin push ni despliegue.
+Las capturas se actualizaron a 1920, 1440, 1280 y 390 px. El diseño quedó aprobado por el propietario; no se realizaron más cambios estéticos para publicar.
 
 La estructura aceptada de Inicio se conserva. Se regeneraron las doce capturas principales, incluido el header actualizado en Materias y Configuración. Se agregaron dos ejemplos de celebraciones con datos de prueba específicos; no son estados precargados ni datos del sitio publicado.
