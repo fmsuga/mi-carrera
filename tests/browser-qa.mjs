@@ -16,7 +16,7 @@ async function capture(page,name) {
   try { await fs.rename(temporary,path); }
   finally { await fs.rm(temporary,{force:true}); }
 }
-export async function runBrowserQA(page) {
+export async function runBrowserQA(page,{dashboardOnly=false}={}) {
   const results=[], errors=[], externalRequests=[];
   page.on('pageerror',err => errors.push(err.message));
   page.on('request',req => { if (!req.url().startsWith(new URL(base).origin)) externalRequests.push(req.url()); });
@@ -27,6 +27,10 @@ export async function runBrowserQA(page) {
   await page.evaluate(raw => localStorage.setItem('ap2_state',raw),original);
   await page.reload();
   const migrated=await page.evaluate(() => JSON.parse(localStorage.getItem('ap2_state')));
+  const hero=page.locator('.academic-hero');
+  check(await hero.count() === 1 && await hero.locator('.panel').count() === 0,'Un único resumen principal sin tarjetas internas');
+  check(await hero.locator('.hero-subjects .hero-metric-value').innerText() === '1 / 33' && await hero.locator('.hero-hours .hero-metric-value').innerText() === '60 / 3.014 h','Materias y horas reales integradas en la hero card');
+  check(await hero.locator('.average-value').innerText() === '8,00 / 10' && await hero.locator('.ring-value').isVisible(),'Promedio y porcentaje visibles en la misma superficie');
   check(!!migrated['Introducción a la Informática'].exs[0].id,'Migración preserva los exámenes y asigna IDs');
   check(await page.evaluate(raw => Object.keys(localStorage).filter(k => k.startsWith('ap2_backup_')).some(k => localStorage.getItem(k) === raw),original),'Backup previo conserva los bytes originales');
   await page.getByRole('link',{name:'Materias',exact:true}).click();
@@ -159,6 +163,13 @@ export async function runBrowserQA(page) {
     await page.setViewportSize({width,height:1000});
     for(const route of ['inicio','materias','configuracion']) {
       await page.goto(base+'#'+route);
+      if (route === 'inicio') {
+        const layout=await hero.evaluate(el => {
+          const box=el.getBoundingClientRect(), dashboard=el.parentElement.getBoundingClientRect();
+          return {fullWidth:Math.abs(box.width-dashboard.width) < 1,inside:[...el.querySelectorAll('.ring,.hero-subjects,.hero-hours,.hero-average')].every(metric => { const m=metric.getBoundingClientRect(); return m.left >= box.left && m.right <= box.right && m.top >= box.top && m.bottom <= box.bottom; })};
+        });
+        assert.ok(layout.fullWidth && layout.inside,`Resumen integrado sin desbordes a ${width}px`);
+      }
       if(route === 'materias') {
         await page.locator('#year-1').evaluate(el => el.open=true);
         await page.locator('#year-2').evaluate(el => el.open=true);
@@ -175,6 +186,7 @@ export async function runBrowserQA(page) {
     }
   }
   check(dimensions.length === 15,'Sin desborde en 1920, 1440, 1280, 768 y 390 px en las tres vistas');
+  check(true,'Hero a ancho completo con las cuatro métricas contenidas en desktop, tablet y mobile');
   for(const [width,name] of [[1920,'desktop-1920'],[1440,'desktop'],[1280,'desktop-1280'],[390,'mobile']]) {
     await page.setViewportSize({width,height:1000});
     await page.goto(base+'#inicio');
@@ -182,6 +194,7 @@ export async function runBrowserQA(page) {
     await page.evaluate(() => window.scrollTo(0,0));
     await page.evaluate(() => document.fonts.ready);
     await capture(page,'dashboard-'+name);
+    if (dashboardOnly) continue;
     await page.goto(base+'#materias');
     await page.locator('#mat-list details').evaluateAll(els => els.forEach(el => el.open=false));
     await page.locator('#year-2').evaluate(el => el.open=true);

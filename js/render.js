@@ -27,28 +27,37 @@ function examAgenda(list) {
 export function renderDash() {
   const data = getState(), s = stats(data), list = upcoming(data);
   $('header-progress').textContent = pct(s.pct) + '%';
-  const counts = [ ['green',s.ap,'Aprobadas'],['yellow',s.cur,'En curso'],['muted',s.pen,'Pendientes'],[s.des ? 'red' : 'muted',s.des,'Desaprobadas'] ];
+  const statuses = [ [s.cur,'En curso','yellow'],[s.pen,'Pendientes','muted'],...(s.des ? [[s.des,'Desaprobadas','red']] : []) ];
   $('dashboard').innerHTML = `
-    <div class="hero-grid">
-      <article class="panel progress-card">
+    <article class="panel academic-hero" aria-label="Resumen principal de la carrera">
+      <div class="hero-main">
         <div class="ring" role="img" aria-label="${pct(s.pct)} por ciento de materias aprobadas">
           <svg viewBox="0 0 180 180" aria-hidden="true"><circle class="ring-track" cx="90" cy="90" r="78"/><circle class="ring-progress" cx="90" cy="90" r="78" pathLength="100" stroke-opacity="${s.ap ? 1 : 0}" stroke-dasharray="${s.pct} 100"/></svg>
           <div class="ring-center"><div class="ring-value">${pct(s.pct)}<small>%</small></div><span class="ring-caption">DE LA CARRERA</span></div>
         </div>
-        <div class="progress-copy">
-          <div class="card-kicker">Materias aprobadas</div>
-          <h2>${s.ap} <span>de ${TOTAL_M}</span></h2>
-          <p>${s.ap === TOTAL_M ? 'Completaste las materias del plan.' : `Te ${TOTAL_M - s.ap === 1 ? 'queda 1 materia' : `quedan ${TOTAL_M - s.ap} materias`} del plan.`}</p>
-          <div class="hours"><div class="bar-label"><span>Horas académicas</span><strong>${s.hAp.toLocaleString('es-AR')} / ${TOTAL_H.toLocaleString('es-AR')} h</strong></div>${bar(s.hourPct)}</div>
+        <div class="hero-metrics">
+          <div class="hero-metric hero-subjects">
+            <div class="hero-metric-heading"><h2>Materias aprobadas</h2><p class="hero-metric-value">${s.ap} <span>/ ${TOTAL_M}</span></p></div>
+            ${bar(s.pct)}
+          </div>
+          <div class="hero-metric hero-hours">
+            <div class="hero-metric-heading"><h2>Horas aprobadas</h2><p class="hero-metric-value">${s.hAp.toLocaleString('es-AR')} <span>/ ${TOTAL_H.toLocaleString('es-AR')} h</span></p></div>
+            ${bar(s.hourPct)}
+          </div>
         </div>
-        <p class="caption progress-note">Porcentaje sobre las ${TOTAL_M} materias del plan. Sin validez de certificación oficial.</p>
-      </article>
-      <article class="panel average-card">
-        <div class="average-heading"><h2>Promedio general</h2><div class="average-value">${s.prom === null ? '—' : s.prom.toFixed(2).replace('.',',')} <small>/ 10</small></div></div>
-        <p class="average-note">${s.graded ? `Sobre ${s.graded} ${s.graded === 1 ? 'materia con nota final' : 'materias con nota final'}.` : 'Todavía no hay notas finales.'} Las aprobaciones sin nota no alteran el promedio.</p>
-        <dl class="stats-grid">${counts.map(([c,n,label]) => `<div class="stat-card"><dt>${label}</dt><dd class="${c}">${n}</dd></div>`).join('')}</dl>
-      </article>
-    </div>
+        <div class="hero-average">
+          <h2>Promedio general</h2>
+          <div class="average-value">${s.prom === null ? '—' : s.prom.toFixed(2).replace('.',',')} <small>/ 10</small></div>
+          <p class="average-note">${s.graded ? `Sobre ${s.graded} ${s.graded === 1 ? 'materia con nota final' : 'materias con nota final'}.` : 'Todavía no hay notas finales.'}</p>
+          <p class="average-explanation">Las aprobaciones sin nota no alteran el promedio.</p>
+        </div>
+      </div>
+      <div class="hero-footer">
+        <p class="hero-context">${s.ap === TOTAL_M ? 'Completaste todas las materias del plan.' : `Te ${TOTAL_M - s.ap === 1 ? 'queda 1 materia' : `quedan ${TOTAL_M - s.ap} materias`} para completar el plan.`}</p>
+        <dl class="hero-status">${statuses.map(([n,label,c]) => `<div><dt>${label}</dt><dd class="${c}">${n}</dd></div>`).join('')}</dl>
+      </div>
+      <p class="hero-note">Porcentaje sobre las ${TOTAL_M} materias del plan. Sin validez de certificación oficial.</p>
+    </article>
     <div class="lower-grid">
       <article class="panel agenda-card">
         <div class="section-head"><div><h2>Próximos exámenes</h2><p>${list.length ? `${list.length} ${list.length === 1 ? 'examen pendiente de rendir' : 'exámenes pendientes de rendir'}` : 'Tu agenda académica'}</p></div><a class="text-link" href="#materias">Ver materias ${icon('arrow')}</a></div>

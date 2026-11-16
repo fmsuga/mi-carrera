@@ -6,7 +6,7 @@
 
 La revisión encontró cuatro problemas en la composición anterior: demasiadas tarjetas con el mismo peso visual; textos de apoyo pequeños; gran distancia horizontal entre nombre y estado de materia; e información redundante en números de año, abreviaturas, iconos y etiquetas.
 
-Esta ronda concentra el progreso en una superficie principal, reúne promedio y estados en un resumen compacto y da prioridad a la agenda y a los requisitos del plan. Los años se presentan como capítulos de un registro académico, con títulos en Source Serif 4 y datos de consulta en Inter. Las fuentes están alojadas localmente y conservan sus licencias.
+El dashboard reúne porcentaje de carrera, promedio general, materias aprobadas/total y horas aprobadas/total en una sola hero card. La card ocupa todo el ancho en desktop, con una superficie continua, sin tarjetas internas. En mobile, porcentaje y promedio comparten la primera fila y las dos métricas de avance se ubican debajo. Los estados y el contexto quedan en una franja secundaria dentro de la misma card. La agenda, los hitos y el avance por año permanecen debajo, con menor peso visual. Los años se presentan como capítulos de un registro académico, con títulos en Source Serif 4 y datos de consulta en Inter. Las fuentes están alojadas localmente y conservan sus licencias.
 
 - Se eliminaron completamente los recuadros 01–04, las abreviaturas de materias y las barras laterales de estado.
 - Los estados se leen como texto y color, sin contenedores tipo pill. La nota tiene su propia columna y las horas se alinean en desktop.
@@ -28,7 +28,13 @@ Todas usan el mismo estado de prueba: 14 materias aprobadas, 2 en curso, una equ
 
 La captura de Materias muestra el segundo año y una materia en curso desplegada. En desktop, el detalle ocupa un panel a ancho completo debajo de ambos cuatrimestres; expandirlo no estira una columna ni agrega ese espacio vacío a la otra. En mobile, el mismo detalle vuelve a ubicarse junto a su materia, conservando sus controles e información.
 
-## Última pasada puntual
+## Jerarquía del dashboard
+
+Se reemplazaron las dos tarjetas superiores por un resumen único. El porcentaje mantiene el anillo SVG y el promedio conserva un tamaño destacado. Las barras de materias y horas permiten leer sus denominadores en la misma superficie; todos los valores siguen proviniendo del estado real. Se mantienen las aclaraciones sobre aprobaciones sin nota y el carácter informativo del porcentaje.
+
+Se actualizaron únicamente las cuatro capturas de Inicio de la galería. Las capturas de Materias y Configuración siguen representando su diseño actual, que no cambió en esta revisión.
+
+## Ajustes puntuales de Materias y Configuración
 
 - El contador de resultados permanece oculto si no hay una búsqueda o un filtro activo; ignorar espacios evita activarlo con una búsqueda vacía.
 - El historial se titula **Copias de seguridad**. Las copias se crean antes de importar o migrar datos, no mediante un programa periódico.
@@ -39,7 +45,7 @@ La captura de Materias muestra el segundo año y una materia en curso desplegada
 ## Comprobación
 
 - 17 pruebas de dominio y almacenamiento aprobadas; no se modificaron las reglas académicas ni el formato de persistencia en esta ronda.
-- 50 comprobaciones de navegador aprobadas, incluidas las funciones locales, foco, actualizaciones inmediatas y navegación.
+- 54 comprobaciones de navegador aprobadas, incluidas las funciones locales, foco, actualizaciones inmediatas y navegación.
 - Sin desbordes horizontales en las tres vistas a 1920, 1440, 1280, 768 y 390 px.
 - Sin errores JavaScript ni solicitudes a servicios externos.
 - Recursos y tipografías disponibles bajo `/mi-carrera/`.

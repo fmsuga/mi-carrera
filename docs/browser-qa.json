@@ -1,6 +1,9 @@
 {
-  "checks": 50,
+  "checks": 54,
   "results": [
+    "Un único resumen principal sin tarjetas internas",
+    "Materias y horas reales integradas en la hero card",
+    "Promedio y porcentaje visibles en la misma superficie",
     "Migración preserva los exámenes y asigna IDs",
     "Backup previo conserva los bytes originales",
     "Contador de resultados oculto sin búsqueda ni filtros",
@@ -40,6 +43,7 @@
     "Cuatrimestres alineados en dos columnas en desktop",
     "Buscador mobile conserva un ancho útil para escribir y leer",
     "Sin desborde en 1920, 1440, 1280, 768 y 390 px en las tres vistas",
+    "Hero a ancho completo con las cuatro métricas contenidas en desktop, tablet y mobile",
     "Tipografías locales cargadas y disponibles",
     "SVG, PNG, iconos móviles, manifest y módulos responden 200 bajo /mi-carrera/",
     "Dashboard llega al 100% con todas las materias aprobadas",

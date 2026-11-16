@@ -20,7 +20,7 @@ npm install --no-save playwright
 node scripts/run-browser-qa.mjs
 ```
 
-El servidor debe estar iniciado. El runner también acepta como primer argumento la ruta absoluta de una instalación existente de Playwright. Las capturas usan datos de prueba; no son datos personales ni valores precargados en la aplicación. Resultados en `docs/browser-qa.json`.
+El servidor debe estar iniciado. La opción `--dashboard-only` regenera únicamente las capturas de Inicio y conserva la verificación funcional de las tres vistas. El runner también acepta como primer argumento la ruta absoluta de una instalación existente de Playwright. Las capturas usan datos de prueba; no son datos personales ni valores precargados en la aplicación. Resultados en `docs/browser-qa.json`.
 
 ## Datos existentes
 
@@ -49,7 +49,7 @@ node scripts/generate-icons.mjs
 
 ## Revisión visual
 
-La iteración actual usa superficies de mayor contraste y una jerarquía tipográfica académica. Los encabezados de año no incluyen recuadros numerados y las filas no muestran abreviaturas o identificadores internos. En desktop los cuatrimestres se presentan en paralelo, con horas, estado y nota alineados. Los detalles abiertos ocupan el ancho completo debajo de ambos cuatrimestres; en mobile vuelven a su fila y separan las acciones principales de las secundarias. El contador de resultados aparece solo al buscar o filtrar, y el historial de Configuración se titula Copias de seguridad.
+La iteración actual usa superficies de mayor contraste y una jerarquía tipográfica académica. Inicio concentra porcentaje, promedio, materias aprobadas y horas en una sola hero card a ancho completo; exámenes, hitos y avance por año quedan como contenido secundario. Los encabezados de año no incluyen recuadros numerados y las filas no muestran abreviaturas o identificadores internos. En desktop los cuatrimestres se presentan en paralelo, con horas, estado y nota alineados. Los detalles abiertos ocupan el ancho completo debajo de ambos cuatrimestres; en mobile vuelven a su fila y separan las acciones principales de las secundarias. El contador de resultados aparece solo al buscar o filtrar, y el historial de Configuración se titula Copias de seguridad.
 
 Se incluyen Inter y Source Serif 4 como archivos locales con sus licencias. La aplicación no solicita fuentes ni servicios externos. Los detalles de la revisión y las doce capturas están en [docs/revision-visual.md](docs/revision-visual.md).
 
