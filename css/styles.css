@@ -165,14 +165,14 @@ main { max-width: 1248px; margin: auto; padding: 32px 24px 24px; outline: none; 
 .icon-btn:hover { background: var(--surface2); color: var(--text); }
 
 /* Each year is a chapter; the two terms share a stable column alignment. */
-.toolbar { display: flex; align-items: center; gap: 24px; padding: 12px 18px; background: #19283b; }
+.toolbar { display: flex; align-items: center; gap: 24px; padding: 12px 18px; margin-bottom: 18px; background: #19283b; }
 .search-field { display: flex; align-items: center; gap: 11px; flex: 1; color: var(--muted); min-width: 0; }
 .search-field input { background: transparent; border: 0; color: var(--text); width: 100%; min-width: 0; min-height: 34px; font-size: 13px; }
 .search-field input::placeholder { color: #9fafc2; }
 .filter-field { display: flex; align-items: center; gap: 12px; font-size: 12px; color: var(--muted); }
 select, input.field-input { background: #1d2c40; border: 1px solid #3a4d66; color: var(--text); padding: 9px 12px; border-radius: 5px; width: 100%; min-width: 0; }
 select { width: auto; }
-.result-count { font-size: 11px; margin: 15px 0; }
+.result-count { font-size: 11px; margin: 0 0 15px; }
 .year-block { margin-bottom: 18px; overflow: clip; }
 .year-summary { display: flex; align-items: center; gap: 24px; padding: 20px 26px; background: #1d2e44; list-style: none; cursor: pointer; }
 .year-summary:hover { background: #24374f; }
@@ -203,6 +203,14 @@ details[open] > .year-summary .chevron, details[open] > .subject-summary .chevro
 .subject-status { font-size: 11px; font-weight: 450; line-height: 1.4; padding-left: 4px; }
 .subject-grade { text-align: right; font-size: 13px; font-weight: 550; font-variant-numeric: tabular-nums; }
 .subject-detail { padding: 18px 22px 22px; background: #101c2b; border-top: 1px solid #304359; }
+.subject-detail-heading { display: none; }
+.year-subject-details > .subject-detail { padding: 20px 26px 26px; }
+.year-subject-details .subject-detail-heading { display: flex; justify-content: space-between; align-items: center; gap: 20px; margin-bottom: 16px; }
+.subject-detail-heading h3 { font-size: 16px; font-weight: 550; }
+.year-subject-details .detail-grid { grid-template-columns: 1fr 1fr; gap: 36px; }
+.subject-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 24px; }
+.subject-secondary-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 20px; }
+.subject-state-actions { border-left: 1px solid var(--border); padding-left: 14px; }
 .subject-detail .notice { margin: 14px 0 0; font-size: 12px; }
 .detail-grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 20px; margin-top: 22px; }
 .detail-grid h3 { font-size: 11px; font-weight: 550; color: var(--muted); margin-bottom: 10px; }
@@ -338,6 +346,13 @@ dialog::backdrop { background: #050c16cc; }
   .year-progress .bar-label { font-size: 10px; }
   .column-labels, .subject-summary { padding-left: 18px; padding-right: 18px; }
   .subject-detail { padding: 18px; }
+  .subject-actions { display: block; }
+  .subject-primary-actions { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
+  .subject-primary-actions.single-action { grid-template-columns: 1fr; }
+  .subject-secondary-actions { display: flex; align-items: flex-start; flex-direction: column; gap: 12px; border-top: 1px solid var(--border); margin-top: 16px; padding-top: 14px; }
+  .subject-secondary-actions > .btn { justify-content: flex-start; }
+  .subject-state-actions { border-left: 0; padding-left: 0; width: 100%; gap: 12px; }
+  .subject-state-actions > .btn { justify-content: flex-start; }
   .semester-label { padding-left: 18px; }
   .detail-grid, .single-semester .detail-grid { grid-template-columns: 1fr; }
   .requirements-grid { grid-template-columns: 1fr; gap: 14px; }
@@ -375,6 +390,7 @@ dialog::backdrop { background: #050c16cc; }
   .subject-detail .button-row { gap: 7px; }
   .subject-detail .btn { font-size: 11px; }
   .subject-detail .btn.quiet { padding-left: 5px; padding-right: 5px; }
+  .subject-detail .subject-primary-actions > .btn { min-width: 0; min-height: 44px; padding: 10px 8px; font-size: 12px; }
   .req-title strong { font-size: 13px; }
   .req-title p { font-size: 11px; }
   .requirement .subject-status { max-width: 70px; }

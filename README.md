@@ -49,7 +49,7 @@ node scripts/generate-icons.mjs
 
 ## Revisión visual
 
-La iteración actual usa superficies de mayor contraste y una jerarquía tipográfica académica. Los encabezados de año no incluyen recuadros numerados y las filas no muestran abreviaturas o identificadores internos. En desktop los cuatrimestres se presentan en paralelo, con horas, estado y nota alineados.
+La iteración actual usa superficies de mayor contraste y una jerarquía tipográfica académica. Los encabezados de año no incluyen recuadros numerados y las filas no muestran abreviaturas o identificadores internos. En desktop los cuatrimestres se presentan en paralelo, con horas, estado y nota alineados. Los detalles abiertos ocupan el ancho completo debajo de ambos cuatrimestres; en mobile vuelven a su fila y separan las acciones principales de las secundarias. El contador de resultados aparece solo al buscar o filtrar, y el historial de Configuración se titula Copias de seguridad.
 
 Se incluyen Inter y Source Serif 4 como archivos locales con sus licencias. La aplicación no solicita fuentes ni servicios externos. Los detalles de la revisión y las doce capturas están en [docs/revision-visual.md](docs/revision-visual.md).
 

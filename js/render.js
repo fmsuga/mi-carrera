@@ -74,26 +74,31 @@ export function renderDash() {
 }
 
 function subjectRow(m, data) {
-  const s = ms(data,m.n), reason = bloqueoActivar(data,m.n), btns = [];
-  if (s.e !== 'aprobada' && s.e !== 'en-curso') btns.push(action('activate',s.e === 'desaprobada' ? 'Reintentar cursada' : 'Iniciar cursada',m.id,'primary',reason ? 'disabled' : ''));
+  const s = ms(data,m.n), reason = bloqueoActivar(data,m.n);
+  const primary = [], secondary = [], stateActions = [];
+  if (s.e !== 'aprobada' && s.e !== 'en-curso') primary.push(action('activate',s.e === 'desaprobada' ? 'Reintentar cursada' : 'Iniciar cursada',m.id,'primary',reason ? 'disabled' : ''));
   if (s.e === 'en-curso') {
-    btns.push(action('exam-add',icon('plus')+'Agregar examen',m.id,'primary'));
-    btns.push(action('approve','Aprobar',m.id,'success',reason ? 'disabled' : ''));
-    btns.push(action('fail','Desaprobar',m.id,'quiet danger'));
+    primary.push(action('exam-add',icon('plus')+'Agregar examen',m.id,'primary'));
+    primary.push(action('approve','Aprobar',m.id,'success',reason ? 'disabled' : ''));
+    stateActions.push(action('fail','Desaprobar',m.id,'quiet danger'));
   }
-  if (s.e === 'aprobada') btns.push(action(s.equivalencia ? 'equivalence' : 'approve','Editar aprobación',m.id));
-  if (s.e !== 'aprobada') btns.push(action('equivalence','Aprobar por equivalencia',m.id,'quiet'));
-  if (s.e !== 'pendiente') btns.push(action('revert',s.e === 'aprobada' ? 'Revertir aprobación' : 'Volver a pendiente',m.id,'quiet'));
+  if (s.e === 'aprobada') primary.push(action(s.equivalencia ? 'equivalence' : 'approve','Editar aprobación',m.id));
+  if (s.e !== 'aprobada') secondary.push(action('equivalence','Aprobar por equivalencia',m.id,'quiet'));
+  if (s.e !== 'pendiente') stateActions.push(action('revert',s.e === 'aprobada' ? 'Revertir aprobación' : 'Volver a pendiente',m.id,'quiet danger'));
   return `<details class="subject ${s.e}" id="subject-${m.id}">
-    <summary class="subject-summary">
+    <summary class="subject-summary" aria-controls="detail-${m.id}">
       <span class="subject-name">${html(m.n)}</span>
       <span class="subject-hours"><span class="sr-only">Carga horaria: </span>${m.h} h</span>
       <span class="subject-status ${color(s.e)}">${s.equivalencia && s.e === 'aprobada' ? 'Equivalencia' : STATUS[s.e]}</span>
       <span class="subject-grade ${color(s.e)}"><span class="sr-only">Nota final: </span>${s.nota == null ? '—' : html(s.nota)}</span>
       <span class="chevron">${icon('chevron')}</span>
     </summary>
-    <div class="subject-detail">
-      <div class="button-row">${btns.join('')}</div>
+    <div class="subject-detail" id="detail-${m.id}" role="region" aria-label="Detalle de ${html(m.n)}">
+      <div class="subject-detail-heading"><h3>${html(m.n)}</h3><button class="icon-btn" data-action="close-subject" data-subject="${m.id}" aria-label="Cerrar detalle de ${html(m.n)}">${icon('close')}</button></div>
+      <div class="subject-actions">
+        <div class="button-row subject-primary-actions${primary.length === 1 ? ' single-action' : ''}" role="group" aria-label="Acciones principales">${primary.join('')}</div>
+        ${secondary.length || stateActions.length ? `<div class="subject-secondary-actions" role="group" aria-label="Otras acciones">${secondary.join('')}${stateActions.length ? `<div class="button-row subject-state-actions" role="group" aria-label="Cambios de estado">${stateActions.join('')}</div>` : ''}</div>` : ''}
+      </div>
       ${reason && s.e !== 'aprobada' ? `<p class="notice">${icon('lock')} ${html(reason)}${s.e === 'en-curso' ? ' Se conserva tu cursada registrada.' : ''}</p>` : ''}
       <div class="detail-grid">
         <div><h3>Correlativas</h3><div class="corr-list">${m.r.length ? m.r.map(n => `<span class="${ms(data,n).e === 'aprobada' ? 'green' : 'muted'}">${icon(ms(data,n).e === 'aprobada' ? 'check' : 'circle')}${html(n)}</span>`).join('') : '<p>Sin correlativas del plan.</p>'}</div></div>
@@ -110,13 +115,15 @@ function semesterColumn(mats, label, data) {
 }
 
 export function renderMats() {
-  const data = getState(), query = $('search').value.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase(), filter = $('status-filter').value;
+  const data = getState(), query = $('search').value.trim().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase(), filter = $('status-filter').value;
   const matches = m => {
     const s = ms(data,m.n);
     return m.n.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().includes(query) && (filter === 'all' || (filter === 'equivalencia' ? s.e === 'aprobada' && s.equivalencia : s.e === filter));
   };
   const visible = SUBJECTS.filter(matches);
-  $('result-count').textContent = `${visible.length} de ${TOTAL_M} materias`;
+  const filtering = query.length > 0 || filter !== 'all';
+  $('result-count').hidden = !filtering;
+  $('result-count').textContent = filtering ? `${visible.length} de ${TOTAL_M} materias` : '';
   $('plan-count').textContent = `${TOTAL_M} materias · ${TOTAL_H.toLocaleString('es-AR')} horas`;
   const groups = [1,2,3,4,'ing'].map(year => {
     const all = SUBJECTS.filter(m => year === 'ing' ? m.n.startsWith('Inglés') : m.a === year && !m.n.startsWith('Inglés'));
@@ -131,9 +138,27 @@ export function renderMats() {
     return `<details class="panel year-block" id="year-${year}" ${query || filter !== 'all' ? 'open' : ''}>
       <summary class="year-summary"><div class="year-name"><h2>${year === 'ing' ? 'Idiomas' : ['Primer','Segundo','Tercer','Cuarto'][year-1]+' año'}</h2><p>${ap} de ${all.length} materias aprobadas</p></div><div class="year-progress"><div class="bar-label"><strong><span class="sr-only">Avance: </span>${pct(ap/all.length*100)}%</strong></div>${bar(ap/all.length*100)}</div><span class="chevron">${icon('chevron')}</span></summary>
       <div class="semester-grid ${year === 'ing' || new Set(mats.map(m => m.c)).size === 1 ? 'single-semester' : ''}">${columns}</div>
+      <div class="year-subject-details" hidden></div>
     </details>`;
   }).join('');
   $('mat-list').innerHTML = (visible.length ? groups : `<div class="panel empty-state"><h3>No encontramos materias</h3><p>Probá otro nombre o cambiá el filtro.</p></div>`) + renderOtros(data);
+}
+
+// Reuse the same detail DOM and controls at both widths. On desktop the open
+// regions sit below both terms, so one expanded row cannot stretch its column.
+export function syncSubjectDetails() {
+  const active = document.activeElement;
+  const wide = window.matchMedia('(min-width: 1051px)').matches;
+  document.querySelectorAll('.year-block').forEach(year => {
+    const host = year.querySelector('.year-subject-details');
+    year.querySelectorAll('.subject').forEach(row => {
+      const detail = $(row.querySelector('summary').getAttribute('aria-controls'));
+      const target = wide && row.open ? host : row;
+      if (detail.parentElement !== target) target.append(detail);
+    });
+    host.hidden = !host.children.length;
+  });
+  if (active?.isConnected && active.closest('.subject-detail') && active.getClientRects().length && document.activeElement !== active) active.focus({preventScroll:true});
 }
 
 function renderOtros(data) {
@@ -150,10 +175,11 @@ function renderOtros(data) {
 export function renderAll() {
   const openIds = new Set([...document.querySelectorAll('#mat-list details[open]')].map(el => el.id));
   const active = document.activeElement;
-  const focus = active && { id:active.id, action:active.dataset.action, subject:active.dataset.subject, exam:active.dataset.id, details:active.closest('details')?.id };
+  const focus = active && { id:active.id, action:active.dataset.action, subject:active.dataset.subject, exam:active.dataset.id, details:active.dataset.subject ? 'subject-'+active.dataset.subject : active.closest('details')?.id };
   const scroll = window.scrollY;
   renderDash(); renderMats();
   openIds.forEach(id => { const el = $(id); if (el) el.open = true; });
+  syncSubjectDetails();
   $('data-warning').hidden = !getReadError(); $('data-warning').textContent = getReadError();
   if (!$('page-configuracion').hidden) renderBackups();
   if (focus && !active.isConnected) {
@@ -171,5 +197,5 @@ export function renderBackups() {
     const date = new Date(Number(key.split('_')[2])).toLocaleString('es-AR');
     const reason = key.includes('pre_import') ? 'Antes de importar' : key.includes('migration') ? 'Antes de migrar a V2' : 'Copia de seguridad';
     return `<div class="backup-item"><div><strong>${date}</strong><span>${reason}</span></div><button class="btn small" data-action="backup-download" data-id="${html(key)}" aria-label="Descargar copia del ${html(date)} en JSON">${icon('download')}JSON</button></div>`;
-  }).join('') : '<div class="backup-empty"><h3>Todavía no hay copias automáticas</h3><p>Cuando importes datos o se actualice su formato, el estado anterior aparecerá acá. Podés exportar una copia manual en cualquier momento.</p></div>';
+  }).join('') : '<div class="backup-empty"><h3>Todavía no hay copias guardadas</h3><p>Cuando importes datos o se actualice su formato, el estado anterior aparecerá acá. Podés exportar una copia manual en cualquier momento.</p></div>';
 }

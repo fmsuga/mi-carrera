@@ -26,12 +26,20 @@ Todas usan el mismo estado de prueba: 14 materias aprobadas, 2 en curso, una equ
 | Materias | [Captura](materias-desktop-1920.png) | [Captura](materias-desktop.png) | [Captura](materias-desktop-1280.png) | [Captura](materias-mobile.png) |
 | Configuración | [Captura](configuracion-desktop-1920.png) | [Captura](configuracion-desktop.png) | [Captura](configuracion-desktop-1280.png) | [Captura](configuracion-mobile.png) |
 
-La captura de Materias muestra el segundo año y una materia en curso desplegada para revisar nombres largos, correlativas, exámenes y acciones. La altura del bloque abierto depende del contenido; el cuatrimestre contiguo conserva su alineación superior.
+La captura de Materias muestra el segundo año y una materia en curso desplegada. En desktop, el detalle ocupa un panel a ancho completo debajo de ambos cuatrimestres; expandirlo no estira una columna ni agrega ese espacio vacío a la otra. En mobile, el mismo detalle vuelve a ubicarse junto a su materia, conservando sus controles e información.
+
+## Última pasada puntual
+
+- El contador de resultados permanece oculto si no hay una búsqueda o un filtro activo; ignorar espacios evita activarlo con una búsqueda vacía.
+- El historial se titula **Copias de seguridad**. Las copias se crean antes de importar o migrar datos, no mediante un programa periódico.
+- En mobile, **Agregar examen** y **Aprobar** forman el grupo principal. La equivalencia y los cambios de estado se presentan separados, sin introducir menús adicionales.
+- Los detalles desktop tienen contexto de materia y control de cierre. Se conserva la apertura por teclado, el foco al cambiar de tamaño y la posibilidad de mantener varios detalles abiertos.
+- Se actualizaron las capturas afectadas de esta misma galería; no se agregaron variantes de versiones anteriores.
 
 ## Comprobación
 
 - 17 pruebas de dominio y almacenamiento aprobadas; no se modificaron las reglas académicas ni el formato de persistencia en esta ronda.
-- 37 comprobaciones de navegador aprobadas, incluidas las funciones locales, foco, actualizaciones inmediatas y navegación.
+- 50 comprobaciones de navegador aprobadas, incluidas las funciones locales, foco, actualizaciones inmediatas y navegación.
 - Sin desbordes horizontales en las tres vistas a 1920, 1440, 1280, 768 y 390 px.
 - Sin errores JavaScript ni solicitudes a servicios externos.
 - Recursos y tipografías disponibles bajo `/mi-carrera/`.

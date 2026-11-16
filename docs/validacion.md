@@ -3,7 +3,7 @@
 Fecha: 16 de noviembre de 2026. Entorno: Node.js 24 y Microsoft Edge con Playwright, en un contexto aislado.
 
 - `npm test`: **17 pruebas aprobadas**, sin fallos.
-- `node scripts/run-browser-qa.mjs`: **37 comprobaciones aprobadas**, sin errores JavaScript. Resultado detallado: [browser-qa.json](browser-qa.json).
+- `node scripts/run-browser-qa.mjs`: **50 comprobaciones aprobadas**, sin errores JavaScript. Resultado detallado: [browser-qa.json](browser-qa.json).
 - Responsive: Inicio, Materias y Configuración a **1920, 1440, 1280, 768 y 390 px**, sin desbordes horizontales.
 - Revisión visual: dashboard, materias y configuración en desktop y mobile, más favicon rasterizado a 16 px.
 - Migración: copia exacta anterior y agregado determinista de IDs; notas, propiedades y requisitos se conservan. Se probó idempotencia y bloqueo seguro ante fallos.
@@ -13,6 +13,7 @@ Fecha: 16 de noviembre de 2026. Entorno: Node.js 24 y Microsoft Edge con Playwri
 - Accesibilidad: campos identificados, navegación por teclado, foco dentro del diálogo, Escape para cerrar y restauración del foco.
 - Recursos: respuestas HTTP 200 para SVG, PNG, iconos móviles, manifest, CSS y módulos bajo `/mi-carrera/`. Navegación por fragmentos compatible con hosting estático.
 - Revisión visual adicional: sin recuadros numerados, abreviaturas, barras laterales o pills redundantes; cuatrimestres alineados en desktop y buscador mobile con ancho útil.
+- Ajustes puntuales: detalle desktop a ancho completo sin alterar las alturas de los cuatrimestres; detalle inline y grupos de acciones separados en mobile; contador condicional; título Copias de seguridad.
 - Navegación: recupera la posición de lectura por vista y abre el año con cursadas activas.
 - Fuentes locales cargadas correctamente; ninguna solicitud de la aplicación a servicios externos.
 - `git diff --check`: sin errores de formato.

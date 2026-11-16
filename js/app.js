@@ -1,6 +1,6 @@
 import { subscribe, getState } from './state.js';
 import { SUBJECTS, ms } from './core.js';
-import { renderAll, renderMats, renderBackups } from './render.js';
+import { renderAll, renderMats, renderBackups, syncSubjectDetails } from './render.js';
 import { initActions } from './actions.js';
 import { hydrateIcons } from './ui.js';
 const $=id => document.getElementById(id);
@@ -20,8 +20,13 @@ function filter() {
   const open = [...document.querySelectorAll('#mat-list details[open]')].map(el => el.id);
   renderMats();
   open.forEach(id => { const el=$(id); if (el) el.open=true; });
+  syncSubjectDetails();
 }
 hydrateIcons(); initActions();
+$('mat-list').addEventListener('toggle',event => {
+  if (event.target.matches('.subject')) syncSubjectDetails();
+},true);
+window.matchMedia('(min-width: 1051px)').addEventListener('change',syncSubjectDetails);
 subscribe(renderAll); renderAll();
 const initialSubject = SUBJECTS.find(m => ms(getState(),m.n).e === 'en-curso') || SUBJECTS.find(m => ms(getState(),m.n).e !== 'aprobada') || SUBJECTS.at(-1);
 $('year-' + (initialSubject.n.startsWith('Inglés') ? 'ing' : initialSubject.a)).open=true;

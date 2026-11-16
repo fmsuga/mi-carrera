@@ -1,7 +1,7 @@
 import { SUBJECTS, EXAM_TYPES, normalizeState, ms, newExamId, stats } from './core.js';
 import { getState, dispatch, exportData, replaceLocal, downloadJSON } from './state.js';
 import { html } from './ui.js';
-import { renderBackups } from './render.js';
+import { renderBackups, syncSubjectDetails } from './render.js';
 const $ = id => document.getElementById(id);
 let submitHandler = null, returnFocus = null, busy = false;
 export function toast(message) {
@@ -10,7 +10,7 @@ export function toast(message) {
 }
 export function openModal(title, body, label, handler) {
   const el = document.activeElement;
-  returnFocus = { el, details:el.closest('details')?.id, action:el.dataset.action, subject:el.dataset.subject, exam:el.dataset.id };
+  returnFocus = { el, details:el.dataset.subject ? 'subject-'+el.dataset.subject : el.closest('details')?.id, action:el.dataset.action, subject:el.dataset.subject, exam:el.dataset.id };
   $('modal-title').textContent=title; $('modal-body').innerHTML=body;
   $('modal-submit').textContent=label; $('modal-error').textContent='';
   submitHandler=handler; $('modal').showModal();
@@ -47,6 +47,12 @@ export function initActions() {
     const m=SUBJECTS.find(m => m.id === subject);
     try {
       if (action === 'export') { exportData(); toast('Backup exportado'); }
+      else if (action === 'close-subject') {
+        const row=$('subject-'+subject);
+        row.open=false;
+        syncSubjectDetails();
+        row.querySelector('summary').focus({preventScroll:true});
+      }
       else if (action === 'import') $('import-file').click();
       else if (action === 'backup-download') downloadJSON(localStorage.getItem(id),id+'.json');
       else if (action === 'activate' || action === 'fail') { await dispatch({type:action,subject}); toast(action === 'activate' ? 'Cursada iniciada' : 'Estado actualizado'); }

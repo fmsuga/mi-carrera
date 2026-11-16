@@ -36,7 +36,7 @@
     <section id="page-materias" class="page" aria-label="Materias" hidden>
       <div class="page-heading"><div><div class="eyebrow">PLAN DE ESTUDIOS</div><h1>Materias</h1><p>Consultá correlativas y llevá al día tus cursadas, notas y exámenes.</p></div><span class="plan-total" id="plan-count"></span></div>
       <div class="toolbar panel"><div class="search-field"><span data-icon="search"></span><label class="sr-only" for="search">Buscar materia por nombre</label><input id="search" type="search" placeholder="Buscar una materia…" autocomplete="off"></div><div class="filter-field"><label for="status-filter">Estado</label><select id="status-filter"><option value="all">Todos los estados</option><option value="aprobada">Aprobadas</option><option value="en-curso">En curso</option><option value="pendiente">Pendientes</option><option value="desaprobada">Desaprobadas</option><option value="equivalencia">Por equivalencia</option></select></div></div>
-      <p class="result-count" id="result-count" aria-live="polite"></p>
+      <p class="result-count" id="result-count" aria-live="polite" hidden></p>
       <div id="mat-list"></div>
     </section>
     <section id="page-configuracion" class="page" aria-label="Configuración" hidden>
@@ -57,7 +57,7 @@
           <div class="storage-note"><span data-icon="shield"></span><p><strong>Guardado en este navegador</strong>Conservá una copia externa antes de cambiar de dispositivo o borrar el almacenamiento del navegador.</p></div>
         </article>
         <article class="panel backup-history">
-          <h2>Copias automáticas</h2>
+          <h2>Copias de seguridad</h2>
           <p class="section-description">Estados anteriores guardados antes de una importación o migración. Podés descargarlos para recuperarlos.</p>
           <div id="backup-list"></div>
         </article>
