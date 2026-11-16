@@ -10,6 +10,8 @@
   <link rel="icon" type="image/svg+xml" sizes="any" href="./assets/favicon.svg">
   <link rel="apple-touch-icon" sizes="180x180" href="./assets/apple-touch-icon.png">
   <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="preload" href="./assets/fonts/InterVariable.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="./assets/fonts/SourceSerif4Variable.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="./css/styles.css">
 </head>
 <body>
@@ -22,29 +24,46 @@
         <a class="tab" href="#materias" data-page="materias"><span data-icon="book"></span>Materias</a>
         <a class="tab" href="#configuracion" data-page="configuracion"><span data-icon="settings"></span>Configuración</a>
       </nav>
-      <div class="mode-label" id="mode-label"><strong id="header-progress" aria-label="Porcentaje de materias del plan aprobadas">0%</strong><span><i></i>Modo local</span></div>
+      <div class="mode-label" id="mode-label"><strong id="header-progress" aria-label="Porcentaje de materias del plan aprobadas">0%</strong><span>Materias aprobadas</span></div>
     </div>
   </header>
   <main id="main" tabindex="-1">
     <div id="data-warning" class="notice danger" role="alert" hidden></div>
     <section id="page-inicio" class="page active" aria-label="Inicio">
-      <div class="page-heading"><div><div class="eyebrow">TU RECORRIDO ACADÉMICO</div><h1>Cada materia, un paso más.</h1><p>Una mirada clara a tu avance y a lo que viene.</p></div><span class="date-label" id="today-label"></span></div>
+      <div class="page-heading"><div><h1>Resumen académico</h1><p>Tu progreso, tus próximos exámenes y los hitos del plan.</p></div><span class="date-label" id="today-label"></span></div>
       <div id="dashboard"></div>
     </section>
     <section id="page-materias" class="page" aria-label="Materias" hidden>
-      <div class="page-heading"><div><div class="eyebrow">PLAN DE ESTUDIOS</div><h1>Tu recorrido, materia a materia.</h1><p>Consultá correlativas y llevá al día tus cursadas, notas y exámenes.</p></div><span class="pill blue" id="plan-count"></span></div>
+      <div class="page-heading"><div><div class="eyebrow">PLAN DE ESTUDIOS</div><h1>Materias</h1><p>Consultá correlativas y llevá al día tus cursadas, notas y exámenes.</p></div><span class="plan-total" id="plan-count"></span></div>
       <div class="toolbar panel"><div class="search-field"><span data-icon="search"></span><label class="sr-only" for="search">Buscar materia por nombre</label><input id="search" type="search" placeholder="Buscar una materia…" autocomplete="off"></div><div class="filter-field"><label for="status-filter">Estado</label><select id="status-filter"><option value="all">Todos los estados</option><option value="aprobada">Aprobadas</option><option value="en-curso">En curso</option><option value="pendiente">Pendientes</option><option value="desaprobada">Desaprobadas</option><option value="equivalencia">Por equivalencia</option></select></div></div>
       <p class="result-count" id="result-count" aria-live="polite"></p>
       <div id="mat-list"></div>
     </section>
     <section id="page-configuracion" class="page" aria-label="Configuración" hidden>
-      <div class="page-heading"><div><div class="eyebrow">A TU MANERA</div><h1>Configuración</h1><p>Tus datos, siempre bajo tu control.</p></div></div>
+      <div class="page-heading"><div><div class="eyebrow">DATOS Y RESPALDOS</div><h1>Configuración</h1><p>Tus datos, siempre bajo tu control.</p></div></div>
       <div class="config-grid">
-        <article class="panel config-card"><div class="card-icon" data-icon="shield"></div><h2>Copias de seguridad</h2><p>Exportá tu progreso o importá un backup JSON. Antes de importar, validamos el archivo y guardamos una copia del estado anterior en este navegador.</p><div class="button-row"><button class="btn primary" data-action="export"><span data-icon="download"></span>Exportar datos</button><button class="btn" data-action="import"><span data-icon="upload"></span>Importar JSON</button><input type="file" id="import-file" accept=".json,application/json" hidden></div><details class="backup-details"><summary>Copias automáticas guardadas</summary><div id="backup-list"></div></details><p class="small muted">El modo local guarda tu progreso en este navegador y en este origen. Conservá un backup externo antes de cambiar de dispositivo.</p></article>
-        <article class="panel config-card"><div class="card-icon" data-icon="send"></div><h2>Telegram y sincronización</h2><div id="cloud-settings"><span class="pill muted">Servicio sin configurar</span><p>La aplicación funciona de forma local. La sincronización y los avisos automáticos por Telegram forman parte de la segunda etapa, pendiente de definir el backend.</p></div></article>
+        <article class="panel config-card">
+          <h2>Gestioná tus datos</h2>
+          <p class="section-description">Materias, notas, equivalencias, exámenes y requisitos, en una copia completa.</p>
+          <div class="data-operation">
+            <div><h3>Exportar una copia</h3><p>Descargá tu información en formato JSON para conservarla fuera del navegador.</p></div>
+            <button class="btn primary" data-action="export"><span data-icon="download"></span>Exportar JSON</button>
+          </div>
+          <div class="data-operation">
+            <div><h3>Importar un backup</h3><p>Revisamos el archivo y pedimos tu confirmación antes de sustituir registros. Primero guardamos una copia del estado anterior.</p></div>
+            <button class="btn" data-action="import"><span data-icon="upload"></span>Elegir archivo</button>
+            <input type="file" id="import-file" accept=".json,application/json" hidden>
+          </div>
+          <div class="storage-note"><span data-icon="shield"></span><p><strong>Guardado en este navegador</strong>Conservá una copia externa antes de cambiar de dispositivo o borrar el almacenamiento del navegador.</p></div>
+        </article>
+        <article class="panel backup-history">
+          <h2>Copias automáticas</h2>
+          <p class="section-description">Estados anteriores guardados antes de una importación o migración. Podés descargarlos para recuperarlos.</p>
+          <div id="backup-list"></div>
+        </article>
       </div>
     </section>
-    <footer class="footer"><span>UNLPam <span class="footer-dot">/</span> Analista Programador</span><span>Tu progreso, a tu ritmo.</span></footer>
+    <footer class="footer"><span>Datos guardados en este navegador</span><a href="#configuracion">Copias de seguridad</a></footer>
   </main>
   <dialog id="modal" aria-labelledby="modal-title"><form id="modal-form"><div class="modal-heading"><h2 id="modal-title"></h2><button type="button" class="icon-btn" id="modal-close" aria-label="Cerrar diálogo"><span data-icon="close"></span></button></div><div id="modal-body"></div><p id="modal-error" class="form-error" role="alert"></p><div class="modal-foot"><button type="button" class="btn" id="modal-cancel">Cancelar</button><button type="submit" class="btn primary" id="modal-submit">Guardar</button></div></form></dialog>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>

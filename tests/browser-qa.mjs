@@ -4,8 +4,9 @@ import assert from 'node:assert/strict';
 import {fileURLToPath} from 'node:url';
 const base='http://127.0.0.1:4173/mi-carrera/';
 export async function runBrowserQA(page) {
-  const results=[], errors=[];
+  const results=[], errors=[], externalRequests=[];
   page.on('pageerror',err => errors.push(err.message));
+  page.on('request',req => { if (!req.url().startsWith(new URL(base).origin)) externalRequests.push(req.url()); });
   const check=(condition,message) => { assert.ok(condition,message); results.push(message); };
   await page.goto(base);
   const old={'Preliminares de Matemática':{e:'aprobada',nota:8,exs:[]},'Introducción a la Informática':{e:'en-curso',nota:null,exs:[{tipo:'Parcial 1',fecha:'2026-12-10',nota:null}]},'_otro_pc':'pendiente'};
@@ -16,6 +17,12 @@ export async function runBrowserQA(page) {
   check(!!migrated['Introducción a la Informática'].exs[0].id,'Migración preserva los exámenes y asigna IDs');
   check(await page.evaluate(raw => Object.keys(localStorage).filter(k => k.startsWith('ap2_backup_')).some(k => localStorage.getItem(k) === raw),original),'Backup previo conserva los bytes originales');
   await page.getByRole('link',{name:'Materias',exact:true}).click();
+  await page.evaluate(() => window.scrollTo(0,260));
+  await page.getByRole('link',{name:'Inicio',exact:true}).click();
+  check(await page.evaluate(() => window.scrollY === 0),'Cambiar de vista abre Inicio en su posición inicial');
+  await page.getByRole('link',{name:'Materias',exact:true}).click();
+  check(await page.evaluate(() => window.scrollY >= 250),'Volver a Materias conserva su posición de lectura');
+  await page.evaluate(() => window.scrollTo(0,0));
   await page.locator('#subject-alg > summary').click();
   check(await page.locator('#subject-alg [data-action="activate"]').isEnabled(),'Correlativa aprobada habilita Álgebra');
   await page.locator('#subject-alg [data-action="activate"]').click();
@@ -53,11 +60,11 @@ export async function runBrowserQA(page) {
   await page.locator('#status-filter').selectOption('all');
   const second=await page.context().newPage(); await second.goto(base+'#materias');
   await page.evaluate(async() => { const s=await import('./js/state.js'); await s.dispatch({type:'equivalence',subject:'pre'}); });
-  await second.waitForFunction(() => document.querySelector('#subject-pre .pill')?.textContent === 'Equivalencia');
+  await second.waitForFunction(() => document.querySelector('#subject-pre .subject-status')?.textContent === 'Equivalencia');
   check(true,'Evento storage sincroniza dos pestañas reales');
   await second.close();
   await page.reload();
-  check(await page.locator('#subject-pre .pill').innerText() === 'Equivalencia','Estado persiste al volver a abrir la página');
+  check(await page.locator('#subject-pre .subject-status').innerText() === 'Equivalencia','Estado persiste al volver a abrir la página');
   await page.getByRole('link',{name:'Configuración',exact:true}).click();
   const before=await page.evaluate(() => localStorage.getItem('ap2_state'));
   await page.locator('#import-file').setInputFiles({name:'invalid.json',mimeType:'application/json',buffer:Buffer.from('{"Álgebra":{"e":"invalid"}}')});
@@ -89,30 +96,50 @@ export async function runBrowserQA(page) {
     data=c.applyCommand(data,{type:'exam-add',subject:'pye',id:'ex-qa-far',kind:'Final',date:date(18)});
     localStorage.setItem('ap2_state',JSON.stringify(data)); (await import('./js/state.js')).readLocal();
   });
+  await page.reload();
+  check(await page.locator('#year-2').evaluate(el => el.open),'Materias abre automáticamente el año con cursadas activas');
+  check(await page.locator('.year-number,.subject-code,.state-mark,.pill').count() === 0,'Sin recuadros numerados, abreviaturas, barras laterales ni pills redundantes');
   await page.getByRole('link',{name:'Inicio',exact:true}).click();
   const dimensions=[];
   for(const width of [1920,1440,1280,768,390]) {
     await page.setViewportSize({width,height:1000});
     for(const route of ['inicio','materias','configuracion']) {
       await page.goto(base+'#'+route);
-      if(route === 'materias') { await page.locator('#subject-pre > summary').click(); }
+      if(route === 'materias') {
+        await page.locator('#year-1').evaluate(el => el.open=true);
+        await page.locator('#year-2').evaluate(el => el.open=true);
+        await page.locator('#subject-pre').evaluate(el => el.open=true);
+        if (width === 390) check(await page.locator('#search').evaluate(el => el.clientWidth >= 200),'Buscador mobile conserva un ancho útil para escribir y leer');
+        if (width === 1440) {
+          const terms = await page.locator('#year-2 .semester').evaluateAll(els => els.map(el => ({x:el.getBoundingClientRect().x,y:el.getBoundingClientRect().y})));
+          check(terms[1].x > terms[0].x && Math.abs(terms[1].y - terms[0].y) < 1,'Cuatrimestres alineados en dos columnas en desktop');
+        }
+      }
       const sizes=await page.evaluate(() => ({scroll:document.documentElement.scrollWidth,client:document.documentElement.clientWidth}));
       assert.ok(sizes.scroll <= sizes.client,`Horizontal overflow ${width} ${route}: ${JSON.stringify(sizes)}`);
       dimensions.push(`${width}:${route}`);
     }
   }
   check(dimensions.length === 15,'Sin desborde en 1920, 1440, 1280, 768 y 390 px en las tres vistas');
-  for(const [width,name] of [[1440,'desktop'],[390,'mobile']]) {
+  for(const [width,name] of [[1920,'desktop-1920'],[1440,'desktop'],[1280,'desktop-1280'],[390,'mobile']]) {
     await page.setViewportSize({width,height:1000});
     await page.goto(base+'#inicio');
     await page.waitForFunction(() => getComputedStyle(document.querySelector('#toast')).opacity === '0');
+    await page.evaluate(() => window.scrollTo(0,0));
+    await page.evaluate(() => document.fonts.ready);
     await page.screenshot({path:fileURLToPath(new URL('../docs/dashboard-'+name+'.png',import.meta.url)),fullPage:true});
-    await page.goto(base+'#materias'); await page.locator('#subject-pre').evaluate(el => el.open=true);
+    await page.goto(base+'#materias');
+    await page.locator('#mat-list details').evaluateAll(els => els.forEach(el => el.open=false));
+    await page.locator('#year-2').evaluate(el => el.open=true);
+    await page.locator('#subject-lia').evaluate(el => el.open=true);
+    await page.evaluate(() => window.scrollTo(0,0));
     await page.screenshot({path:fileURLToPath(new URL('../docs/materias-'+name+'.png',import.meta.url)),fullPage:true});
     await page.goto(base+'#configuracion');
+    await page.evaluate(() => window.scrollTo(0,0));
     await page.screenshot({path:fileURLToPath(new URL('../docs/configuracion-'+name+'.png',import.meta.url)),fullPage:true});
   }
-  for(const path of ['assets/favicon.svg','assets/favicon-16.png','assets/favicon-32.png','assets/apple-touch-icon.png','assets/icon-192.png','assets/icon-512.png','manifest.webmanifest','js/app.js','css/styles.css']) {
+  check(await page.evaluate(() => document.fonts.check('400 14px Inter') && document.fonts.check('500 24px "Source Serif"')),'Tipografías locales cargadas y disponibles');
+  for(const path of ['assets/favicon.svg','assets/favicon-16.png','assets/favicon-32.png','assets/apple-touch-icon.png','assets/icon-192.png','assets/icon-512.png','manifest.webmanifest','js/app.js','css/styles.css','assets/fonts/InterVariable.woff2','assets/fonts/SourceSerif4Variable.woff2']) {
     const response=await page.request.get(base+path); assert.equal(response.status(),200,path);
   }
   check(true,'SVG, PNG, iconos móviles, manifest y módulos responden 200 bajo /mi-carrera/');
@@ -141,5 +168,6 @@ export async function runBrowserQA(page) {
   check(await page.locator('#data-warning').isVisible(),'Lectura corrupta muestra protección de datos');
   check(await page.evaluate(() => localStorage.getItem('ap2_state')) === '{broken','Lectura corrupta no sobrescribe los bytes originales');
   check(errors.length === 0,'Sin errores JavaScript en las pruebas del navegador');
-  return {checks:results.length,results,dimensions,errors};
+  check(externalRequests.length === 0,'La aplicación no realiza solicitudes a servicios externos');
+  return {checks:results.length,results,dimensions,errors,externalRequests};
 }

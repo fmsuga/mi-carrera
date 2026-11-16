@@ -1,8 +1,10 @@
 {
-  "checks": 29,
+  "checks": 37,
   "results": [
     "Migración preserva los exámenes y asigna IDs",
     "Backup previo conserva los bytes originales",
+    "Cambiar de vista abre Inicio en su posición inicial",
+    "Volver a Materias conserva su posición de lectura",
     "Correlativa aprobada habilita Álgebra",
     "Operación conserva acordeones abiertos",
     "Promedio se actualiza inmediatamente",
@@ -20,7 +22,12 @@
     "Importación válida crea copia anterior recuperable",
     "Modal mantiene navegación con teclado dentro del diálogo",
     "Escape cierra el modal",
+    "Materias abre automáticamente el año con cursadas activas",
+    "Sin recuadros numerados, abreviaturas, barras laterales ni pills redundantes",
+    "Cuatrimestres alineados en dos columnas en desktop",
+    "Buscador mobile conserva un ancho útil para escribir y leer",
     "Sin desborde en 1920, 1440, 1280, 768 y 390 px en las tres vistas",
+    "Tipografías locales cargadas y disponibles",
     "SVG, PNG, iconos móviles, manifest y módulos responden 200 bajo /mi-carrera/",
     "Dashboard llega al 100% con todas las materias aprobadas",
     "Requisito EPS se habilita automáticamente al superar el 70%",
@@ -29,7 +36,8 @@
     "Prácticas Comunitarias se actualiza al alcanzar 14 aprobadas",
     "Lectura corrupta muestra protección de datos",
     "Lectura corrupta no sobrescribe los bytes originales",
-    "Sin errores JavaScript en las pruebas del navegador"
+    "Sin errores JavaScript en las pruebas del navegador",
+    "La aplicación no realiza solicitudes a servicios externos"
   ],
   "dimensions": [
     "1920:inicio",
@@ -48,5 +56,6 @@
     "390:materias",
     "390:configuracion"
   ],
-  "errors": []
+  "errors": [],
+  "externalRequests": []
 }
