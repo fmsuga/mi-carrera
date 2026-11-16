@@ -17,7 +17,7 @@ export async function runVisualPolishQA(page) {
   await page.goto(base);
   await page.evaluate(async() => {
     const {SUBJECTS}=await import('./js/core.js');
-    localStorage.setItem('ap2_state',JSON.stringify(Object.fromEntries(SUBJECTS.slice(0,13).map(m => [m.n,{e:'aprobada',nota:null,exs:[]}]))));
+    localStorage.setItem('ap2_state',JSON.stringify(Object.fromEntries(SUBJECTS.slice(0,8).map(m => [m.n,{e:'aprobada',nota:null,exs:[]}]))));
   });
   await page.reload();
   await page.waitForSelector('.academic-hero');
@@ -27,7 +27,7 @@ export async function runVisualPolishQA(page) {
   check(initial.calls.every(c => c.options.duration <= 1000 && (c.options.iterations ?? 1) === 1),'Todas las animaciones de indicadores son breves y sin bucles');
   await page.waitForFunction(() => document.getAnimations().length === 0);
   const rendered=await page.locator('.ring-progress').evaluate(el => parseFloat(getComputedStyle(el).strokeDasharray));
-  check(Math.abs(rendered-13/33*100) < .01 && await page.locator('.ring-value').innerText() === '39,4%','La entrada termina en el porcentaje real y el número siempre muestra el valor correcto');
+  check(Math.abs(rendered-8/22*100) < .01 && await page.locator('.ring-value').innerText() === '36,4%','La entrada termina en el porcentaje real y el número siempre muestra el valor correcto');
   check(await page.evaluate(raw => localStorage.getItem('ap2_state') === raw,initial.raw),'Las animaciones no modifican registros académicos');
   check(await page.locator('#milestone-notice').isHidden(),'La carga de datos existentes no dispara celebraciones');
   const ringsBefore=await page.evaluate(() => window.__motionCalls.filter(c => c.key === 'career-ring').length);
@@ -42,14 +42,14 @@ export async function runVisualPolishQA(page) {
   await page.bringToFront();
   await page.getByRole('link',{name:'Materias',exact:true}).click();
   await page.locator('#year-2').evaluate(el => el.open=true);
-  await page.locator('#subject-arq > summary').click();
-  await page.locator('#detail-arq [data-action="activate"]').click();
+  await page.locator('#subject-eda > summary').click();
+  await page.locator('#detail-eda [data-action="activate"]').click();
   check(await page.evaluate(() => window.__motionCalls.filter(c => c.key === 'career-ring').length) === ringsBefore,'Una operación sin cambio de porcentaje no vuelve a animar el anillo');
-  await page.locator('#detail-arq [data-action="approve"]').click();
+  await page.locator('#detail-eda [data-action="approve"]').click();
   await page.locator('#final-grade').fill('8'); await page.locator('#modal-submit').click();
   await page.waitForSelector('#milestone-notice:not([hidden])');
   check((await page.locator('#milestone-notice strong').innerText()).includes('40%'),'Una aprobación que cruza 40% celebra el hito real');
-  await watcher.waitForFunction(() => document.querySelector('.hero-subjects .hero-metric-value').textContent.trim() === '14 / 33');
+  await watcher.waitForFunction(() => document.querySelector('.hero-subjects .hero-metric-value').textContent.trim() === '9 / 22');
   check(await watcher.locator('#milestone-notice').isHidden(),'La celebración se muestra únicamente en la pestaña que realizó la aprobación');
   await watcher.close();
   check(await page.locator('#progress-info').evaluate(el => el.open),'La explicación abierta conserva su estado tras actualizar datos');
@@ -63,19 +63,19 @@ export async function runVisualPolishQA(page) {
   check(await page.locator('#milestone-notice').isHidden(),'Recargar después del 40% no repite la celebración');
   await page.evaluate(async() => {
     const s=await import('./js/state.js');
-    await s.dispatch({type:'revert',subject:'arq'});
-    await s.dispatch({type:'approve',subject:'arq',grade:9});
+    await s.dispatch({type:'revert',subject:'eda'});
+    await s.dispatch({type:'approve',subject:'eda',grade:9});
   });
   check(await page.locator('#milestone-notice').isHidden(),'Revertir y volver a cruzar un hito ya registrado no lo celebra otra vez');
 
   await page.evaluate(async() => {
     const c=await import('./js/core.js'), s=await import('./js/state.js');
-    await s.replaceLocal(Object.fromEntries(c.SUBJECTS.slice(0,23).map(m => [m.n,{e:'aprobada',nota:null,exs:[]}])));
+    await s.replaceLocal(Object.fromEntries([...c.SUBJECTS.slice(0,15),...c.LANGUAGES].map(m => [m.n,{e:'aprobada',nota:null,exs:[]}])));
   });
   await page.setViewportSize({width:390,height:1000});
   await page.emulateMedia({reducedMotion:'reduce'});
   await page.evaluate(() => { window.__motionCalls=[]; });
-  await page.evaluate(async() => (await import('./js/state.js')).dispatch({type:'approve',subject:'lam',grade:8}));
+  await page.evaluate(async() => (await import('./js/state.js')).dispatch({type:'approve',subject:'red',grade:8}));
   await page.waitForSelector('#milestone-notice:not([hidden])');
   check((await page.locator('#milestone-notice strong').innerText()).includes('70%'),'El cruce real de 70% también se celebra en mobile');
   check(await page.evaluate(() => window.__motionCalls.length === 0 && document.getAnimations().length === 0),'Movimiento reducido desactiva entrada, transiciones y animación de la celebración');
@@ -88,13 +88,13 @@ export async function runVisualPolishQA(page) {
     const c=await import('./js/core.js'), s=await import('./js/state.js');
     localStorage.removeItem('ap2_ui_milestones_v1');
     await s.replaceLocal({});
-    await s.replaceLocal(Object.fromEntries(c.SUBJECTS.slice(0,24).map(m => [m.n,{e:'aprobada',nota:null,exs:[]}])));
+    await s.replaceLocal(Object.fromEntries(c.SUBJECTS.slice(0,16).map(m => [m.n,{e:'aprobada',nota:null,exs:[]}])));
   });
   await page.waitForFunction(() => JSON.parse(localStorage.getItem('ap2_ui_milestones_v1'))?.reached.includes(70));
   check(await page.locator('#milestone-notice').isHidden(),'Importar datos que superan ambos umbrales no dispara celebraciones');
   await page.evaluate(async() => {
     const {SUBJECTS}=await import('./js/core.js');
-    const legacy=Object.fromEntries(SUBJECTS.slice(0,24).map(m => [m.n,{e:'aprobada',nota:null,exs:[]}]));
+    const legacy=Object.fromEntries(SUBJECTS.slice(0,16).map(m => [m.n,{e:'aprobada',nota:null,exs:[]}]));
     legacy['Introducción a la Informática'].exs=[{tipo:'Final',fecha:'2026-12-10',nota:7}];
     localStorage.setItem('ap2_state',JSON.stringify(legacy)); localStorage.removeItem('ap2_ui_milestones_v1');
   });

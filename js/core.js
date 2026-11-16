@@ -1,9 +1,13 @@
 // Shared by the browser and Edge Functions. No DOM, storage or network access.
-import { PLAN, OTROS, TOTAL_M, TOTAL_H } from './plan.js';
-export { PLAN, OTROS, TOTAL_M, TOTAL_H };
+import { PLAN, LANGUAGES, HISTORICAL_SUBJECTS, OTROS, TOTAL_M, TOTAL_H } from './plan.js';
+export { PLAN, LANGUAGES, HISTORICAL_SUBJECTS, OTROS, TOTAL_M, TOTAL_H };
 
 // Explicit IDs: never derive bot identifiers from an array position.
 export const SUBJECTS = PLAN;
+export const EDITABLE_SUBJECTS = [...PLAN,...LANGUAGES];
+export function retainedRecords(data) {
+  return Object.keys(data).filter(key => !EDITABLE_SUBJECTS.some(m => m.n === key) && !OTROS.some(r => '_otro_'+r.id === key)).map(key => ({key,historical:HISTORICAL_SUBJECTS.some(m => m.n === key)}));
+}
 export const EXAM_TYPES = ['Parcial 1','Parcial 2','Recuperatorio 1','Recuperatorio 2','Final'];
 export const STATUS = { pendiente: 'Pendiente', 'en-curso': 'En curso', aprobada: 'Aprobada', desaprobada: 'Desaprobada' };
 const object = value => value !== null && typeof value === 'object' && !Array.isArray(value);
@@ -21,12 +25,12 @@ export function stats(data) {
   return { ap, cur, des, pen: TOTAL_M - ap - cur - des, hAp, graded, prom: graded ? sum / graded : null, pct: ap / TOTAL_M * 100, hourPct: hAp / TOTAL_H * 100 };
 }
 export function bloqueoActivar(data, name) {
-  const m = SUBJECTS.find(m => m.n === name);
+  const m = EDITABLE_SUBJECTS.find(m => m.n === name);
   if (!m) return 'Materia desconocida.';
   const missing = m.r.filter(n => ms(data, n).e !== 'aprobada');
   if (missing.length) return 'Requiere aprobar: ' + missing.join(', ') + '.';
-  const language = m.a === 2 && m.c === 2 ? 'Inglés I' : m.a === 3 && m.c === 1 ? 'Inglés II' : m.a === 3 && m.c === 2 ? 'Inglés III' : null;
-  if (language && !m.n.startsWith('Inglés') && ms(data, language).e !== 'aprobada') return `Requiere ${language} aprobado para este cuatrimestre.`;
+  const language = LANGUAGES.find(l => l.forYear === m.a && l.forTerm === m.c);
+  if (language && ms(data, language.n).e !== 'aprobada') return `Requiere ${language.n} acreditado para este cuatrimestre.`;
   return null;
 }
 function hash(text) { let h = 2166136261; for (let i=0; i<text.length; i++) h = Math.imul(h ^ text.charCodeAt(i),16777619); return (h >>> 0).toString(36); }
@@ -34,18 +38,20 @@ export function newExamId() { return 'ex-' + crypto.randomUUID(); }
 
 // Additive migration only: retain every existing property, including unknown keys.
 // Invalid input throws; callers must preserve its original bytes and stop writes.
-export function normalizeState(input, strict = false) {
+export function normalizeState(input) {
   if (!object(input)) throw new Error('El archivo debe contener un objeto de estado.');
   const data = structuredClone(input);
   const ids = new Set();
   for (const key of Object.keys(data)) {
     if (['__proto__','constructor','prototype'].includes(key)) throw new Error('Clave de datos no permitida.');
-    const known = SUBJECTS.some(m => m.n === key);
-    if (key.startsWith('_otro_')) {
+    const known = EDITABLE_SUBJECTS.some(m => m.n === key);
+    if (OTROS.some(r => '_otro_'+r.id === key)) {
       if (!['pendiente','en-curso','acreditado'].includes(data[key])) throw new Error(`Requisito inválido: ${key}.`);
       continue;
     }
-    if (!known) { if (strict) throw new Error(`Registro desconocido: ${key}.`); continue; }
+    // Historical/unmapped entries are opaque. Never migrate, discard or coerce
+    // them, including imports. The UI reports them separately for review.
+    if (!known) continue;
     const s = data[key];
     if (!object(s) || (s.e !== undefined && !Object.hasOwn(STATUS, s.e))) throw new Error(`Estado inválido en ${key}.`);
     if (s.nota != null && !grade(s.nota)) throw new Error(`Nota inválida en ${key}.`);
@@ -67,7 +73,7 @@ export function todayISO(now = new Date()) {
 }
 export function daysUntil(date, today = todayISO()) { return Math.round((Date.parse(date) - Date.parse(today)) / 86400000); }
 export function exams(data) {
-  return SUBJECTS.flatMap(m => ms(data,m.n).exs.map(ex => ({ ...ex, subjectId:m.id, name:m.n }))).sort((a,b) => (a.fecha || '9999').localeCompare(b.fecha || '9999'));
+  return EDITABLE_SUBJECTS.flatMap(m => ms(data,m.n).exs.map(ex => ({ ...ex, subjectId:m.id, name:m.n }))).sort((a,b) => (a.fecha || '9999').localeCompare(b.fecha || '9999'));
 }
 export function upcoming(data, today = todayISO()) { return exams(data).filter(ex => ex.fecha && ex.nota == null && !ex.cancelado && daysUntil(ex.fecha,today) >= 0); }
 
@@ -82,7 +88,7 @@ export function applyCommand(input, cmd) {
     data['_otro_' + req.id] = cmd.status;
     return data;
   }
-  const m = SUBJECTS.find(m => m.id === cmd.subject);
+  const m = EDITABLE_SUBJECTS.find(m => m.id === cmd.subject);
   if (!m) throw new Error('Identificador de materia desconocido. Consultá /materias.');
   const s = ms(data,m.n);
   const requireUnlocked = () => { const reason = bloqueoActivar(data,m.n); if (reason) throw new Error(reason); };

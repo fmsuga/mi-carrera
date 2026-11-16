@@ -1,4 +1,4 @@
-import { SUBJECTS, EXAM_TYPES, normalizeState, ms, newExamId, stats } from './core.js';
+import { EDITABLE_SUBJECTS, EXAM_TYPES, normalizeState, retainedRecords, ms, newExamId, stats } from './core.js';
 import { getState, dispatch, exportData, replaceLocal, downloadJSON } from './state.js';
 import { html } from './ui.js';
 import { renderBackups, syncSubjectDetails } from './render.js';
@@ -44,7 +44,7 @@ export function initActions() {
   document.addEventListener('click',async event => {
     const button=event.target.closest('[data-action]'); if (!button || button.disabled) return;
     const {action, subject, id, status} = button.dataset;
-    const m=SUBJECTS.find(m => m.id === subject);
+    const m=EDITABLE_SUBJECTS.find(m => m.id === subject);
     try {
       if (action === 'export') { exportData(); toast('Backup exportado'); }
       else if (action === 'close-subject') {
@@ -58,7 +58,7 @@ export function initActions() {
       else if (action === 'activate' || action === 'fail') { await dispatch({type:action,subject}); toast(action === 'activate' ? 'Cursada iniciada' : 'Estado actualizado'); }
       else if (action === 'requirement') { await dispatch({type:action,id,status}); toast('Requisito actualizado'); }
       else if (action === 'revert') openModal('Volver a pendiente',`<p class="modal-copy">${html(m.n)} volverá a pendiente y su nota final dejará de contarse. Los exámenes se conservan. Los bloqueos y requisitos se recalcularán.</p>`,'Confirmar',async() => { await dispatch({type:'revert',subject}); toast('Materia actualizada'); });
-      else if (action === 'equivalence') openModal('Aprobar por equivalencia',`<p class="modal-copy">${html(m.n)} se registrará como aprobada por equivalencia. Sumará materias y horas, y habilitará sus correlativas. La nota es opcional.</p>`+field('equivalence-grade','Nota de equivalencia (opcional)','number',ms(getState(),m.n).equivalencia ? ms(getState(),m.n).nota ?? '' : '', 'min="4" max="10" step="0.01"'),'Confirmar equivalencia',async() => { await dispatch({type:'equivalence',subject,grade:$('equivalence-grade').value === '' ? null : Number($('equivalence-grade').value)}); toast('Equivalencia registrada'); });
+      else if (action === 'equivalence') openModal('Aprobar por equivalencia',`<p class="modal-copy">${html(m.n)} se registrará como aprobada por equivalencia. ${m.forYear ? 'Se contabiliza como requisito de idioma, separado de las 22 asignaturas.' : 'Sumará asignaturas y horas, y habilitará sus correlativas.'} La nota es opcional.</p>`+field('equivalence-grade','Nota de equivalencia (opcional)','number',ms(getState(),m.n).equivalencia ? ms(getState(),m.n).nota ?? '' : '', 'min="4" max="10" step="0.01"'),'Confirmar equivalencia',async() => { await dispatch({type:'equivalence',subject,grade:$('equivalence-grade').value === '' ? null : Number($('equivalence-grade').value)}); toast('Equivalencia registrada'); });
       else if (action === 'approve') openModal('Aprobación de materia',`<p class="caption" style="margin-bottom:16px">${html(m.n)}</p>`+field('final-grade','Nota final (4 a 10)','number',ms(getState(),m.n).nota ?? '', 'required min="4" max="10" step="0.01"'),'Guardar aprobación',async() => { await dispatch({type:'approve',subject,grade:Number($('final-grade').value)}); toast('Aprobación guardada'); });
       else if (action === 'exam-add' || action === 'exam-edit') {
         const existing=action === 'exam-edit' ? ms(getState(),m.n).exs.find(ex => ex.id === id) : null;
@@ -76,8 +76,8 @@ export function initActions() {
     const file=event.target.files[0]; event.target.value=''; if (!file) return;
     try {
       if (file.size > 5_000_000) throw new Error('El archivo supera los 5 MB.');
-      const next=normalizeState(JSON.parse(await file.text()),true), s=stats(next);
-      openModal('Revisar importación',`<p class="modal-copy">Archivo: <strong>${html(file.name)}</strong><br>${Object.keys(next).length} registros · ${s.ap} materias aprobadas · ${s.cur} en curso.</p><p class="notice warning" style="margin-top:16px">Esta importación sustituirá el estado actual. Guardaremos antes una copia completa en este navegador. Si no se puede guardar la copia, no se importará.</p><label class="modal-copy"><input id="import-confirm" type="checkbox" required> Confirmo que quiero sustituir mis registros con este archivo.</label>`,'Importar y guardar copia',async() => { if (!$('import-confirm').checked) throw new Error('Confirmá la sustitución.'); await replaceLocal(next); renderBackups(); toast('Datos importados. Copia anterior guardada.'); });
+      const next=normalizeState(JSON.parse(await file.text())), s=stats(next), retained=retainedRecords(next);
+      openModal('Revisar importación',`<p class="modal-copy">Archivo: <strong>${html(file.name)}</strong><br>${Object.keys(next).length} registros · ${s.ap} materias aprobadas · ${s.cur} en curso.</p>${retained.length ? `<p class="notice">Se conservarán ${retained.length} registros fuera del plan activo, sin contarlos en las estadísticas. Los que no tengan correspondencia segura quedarán señalados en Configuración.</p>` : ''}<p class="notice warning" style="margin-top:16px">Esta importación sustituirá el estado actual. Guardaremos antes una copia completa en este navegador. Si no se puede guardar la copia, no se importará.</p><label class="modal-copy"><input id="import-confirm" type="checkbox" required> Confirmo que quiero sustituir mis registros con este archivo.</label>`,'Importar y guardar copia',async() => { if (!$('import-confirm').checked) throw new Error('Confirmá la sustitución.'); await replaceLocal(next); renderBackups(); toast('Datos importados. Copia anterior guardada.'); });
     } catch(err) { toast('Archivo no importado. '+err.message); }
   });
 }

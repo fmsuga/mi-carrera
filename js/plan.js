@@ -5,20 +5,21 @@
  *
  * Campos de cada materia:
  *   id → identificador corto permanente (web y futuro bot)
- *   a  → año (1–4)
+ *   a  → año (1–3 en el plan activo)
  *   c  → cuatrimestre (1 o 2)
  *   n  → nombre completo
  *   h  → carga horaria
  *   r  → array de correlativas (nombres exactos)
  */
 
+// Plan 2025, Facultad de Ingeniería UNLPam (PDF revisado, pp. 1–4).
+// https://www.ing.unlpam.edu.ar/planestudio?pk=1&pl=29
 export const PLAN = [
   // ── 1° Año · 1° Cuatrimestre ─────────────────────────────────
   { id:'pre', a:1, c:1, n:"Preliminares de Matemática",     h:60,  r:[] },
   { id:'alg', a:1, c:1, n:"Álgebra",                         h:112, r:["Preliminares de Matemática"] },
   { id:'ama', a:1, c:1, n:"Análisis Matemático I - a",       h:80,  r:["Preliminares de Matemática"] },
   { id:'inf', a:1, c:1, n:"Introducción a la Informática",   h:96,  r:[] },
-  { id:'in1', a:1, c:1, n:"Inglés I",                        h:70,  r:[] },
 
   // ── 1° Año · 2° Cuatrimestre ─────────────────────────────────
   { id:'amb', a:1, c:2, n:"Análisis Matemático I - b",       h:64,  r:["Análisis Matemático I - a"] },
@@ -29,7 +30,6 @@ export const PLAN = [
   { id:'diu', a:2, c:1, n:"Diseño de Interfaces de Usuario", h:80,  r:["Programación Procedural"] },
   { id:'eda', a:2, c:1, n:"Estructuras de Datos y Algoritmos",h:96, r:["Matemática Discreta","Programación Procedural"] },
   { id:'syo', a:2, c:1, n:"Sistemas y Organizaciones",       h:120, r:["Introducción a la Informática"] },
-  { id:'in2', a:2, c:1, n:"Inglés II",                       h:100, r:["Inglés I"] },
 
   // ── 2° Año · 2° Cuatrimestre ─────────────────────────────────
   { id:'ads1', a:2, c:2, n:"Análisis y Diseño de Sistemas I", h:96,  r:["Estructuras de Datos y Algoritmos","Sistemas y Organizaciones"] },
@@ -42,7 +42,6 @@ export const PLAN = [
   { id:'red', a:3, c:1, n:"Introducción a Redes y Comunicaciones", h:96, r:["Arquitectura de Computadoras"] },
   { id:'poo', a:3, c:1, n:"Programación Orientada a Objetos",h:88,  r:["Análisis y Diseño de Sistemas I"] },
   { id:'so', a:3, c:1, n:"Sistemas Operativos",             h:112, r:["Arquitectura de Computadoras"] },
-  { id:'in3', a:3, c:1, n:"Inglés III",                      h:80,  r:["Inglés II"] },
 
   // ── 3° Año · 2° Cuatrimestre ─────────────────────────────────
   { id:'ads2', a:3, c:2, n:"Análisis y Diseño de Sistemas II",h:96,  r:["Base de Datos I","Programación Orientada a Objetos"] },
@@ -50,7 +49,19 @@ export const PLAN = [
   { id:'lam', a:3, c:2, n:"Laboratorio Orientado a Aplicaciones Móviles", h:96, r:["Base de Datos I","Programación Orientada a Objetos"] },
   { id:'web', a:3, c:2, n:"Programación Orientada a la Web", h:104, r:["Base de Datos I","Programación Orientada a Objetos"] },
 
-  // ── 4° Año · 1° Cuatrimestre ─────────────────────────────────
+];
+
+// Independent requirements. Keep original names and IDs as storage identities.
+// The source gives conditions for terms, not prerequisites between English levels.
+export const LANGUAGES = [
+  { id:'in1', n:'Inglés I', h:70, r:[], forYear:2, forTerm:2, cond:'Requisito para cursar el segundo cuatrimestre de segundo año.' },
+  { id:'in2', n:'Inglés II', h:100, r:[], forYear:3, forTerm:1, cond:'Requisito para cursar el primer cuatrimestre de tercer año.' },
+  { id:'in3', n:'Inglés III', h:80, r:[], forYear:3, forTerm:2, cond:'Requisito para cursar el segundo cuatrimestre de tercer año.' },
+];
+
+// Recognition metadata only: these records never enter the active plan, rules,
+// agenda or statistics. Their stored contents are retained verbatim.
+export const HISTORICAL_SUBJECTS = [
   { id:'bd2', a:4, c:1, n:"Base de Datos II",                h:96,  r:["Base de Datos I"] },
   { id:'is1', a:4, c:1, n:"Ingeniería de Software I",        h:96,  r:["Análisis y Diseño de Sistemas II"] },
   { id:'ia', a:4, c:1, n:"Inteligencia Artificial",         h:96,  r:["Probabilidad y Estadística","Laboratorio de Inteligencia Artificial"] },
