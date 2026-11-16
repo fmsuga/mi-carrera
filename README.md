@@ -51,7 +51,11 @@ node scripts/generate-icons.mjs
 
 La iteración actual usa superficies de mayor contraste y una jerarquía tipográfica académica. Inicio concentra porcentaje, promedio, materias aprobadas y horas en una sola hero card a ancho completo; exámenes, hitos y avance por año quedan como contenido secundario. Los encabezados de año no incluyen recuadros numerados y las filas no muestran abreviaturas o identificadores internos. En desktop los cuatrimestres se presentan en paralelo, con horas, estado y nota alineados. Los detalles abiertos ocupan el ancho completo debajo de ambos cuatrimestres; en mobile vuelven a su fila y separan las acciones principales de las secundarias. El contador de resultados aparece solo al buscar o filtrar, y el historial de Configuración se titula Copias de seguridad.
 
-Se incluyen Inter y Source Serif 4 como archivos locales con sus licencias. La aplicación no solicita fuentes ni servicios externos. Los detalles de la revisión y las doce capturas están en [docs/revision-visual.md](docs/revision-visual.md).
+La última pasada conserva esa estructura y refina el anillo, las barras y la iluminación de la hero card. Las entradas son breves, sin bucles, y respetan `prefers-reduced-motion`. El porcentaje se muestra solamente en el resumen principal; la explicación de su cálculo y alcance oficial está disponible en un desplegable discreto.
+
+Los hitos del 40% y 70% se celebran una sola vez por navegador al cruzarlos mediante una aprobación o equivalencia. Un registro de presentación independiente (`ap2_ui_milestones_v1`) evita repeticiones sin cambiar el estado académico ni el JSON exportado. Cargas, importaciones y migraciones registran los hitos existentes silenciosamente. Si ese registro no puede guardarse, la operación académica se conserva y la celebración se omite.
+
+Se incluyen Inter y Source Serif 4 como archivos locales con sus licencias. La aplicación no solicita fuentes ni servicios externos. Los detalles de la revisión, las doce capturas principales y dos ejemplos de celebración están en [docs/revision-visual.md](docs/revision-visual.md).
 
 ## Estado de entregas
 

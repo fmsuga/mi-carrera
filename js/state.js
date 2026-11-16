@@ -6,7 +6,7 @@ const listeners = new Set();
 export const getState = () => current;
 export const getReadError = () => readError;
 export const subscribe = fn => { listeners.add(fn); return () => listeners.delete(fn); };
-const emit = () => listeners.forEach(fn => fn());
+const emit = event => listeners.forEach(fn => fn(event));
 export function backup(raw = localStorage.getItem(STORAGE_KEY) || '{}', reason = 'manual') {
   const key = `ap2_backup_${Date.now()}_${crypto.randomUUID()}_${reason}`;
   localStorage.setItem(key, raw);
@@ -24,7 +24,7 @@ export function readLocal() {
     current = next;
     readError = '';
   } catch (err) { readError = 'No se pudo leer o migrar el estado. Los datos originales siguen intactos. Exportá una copia para revisarlos. ' + err.message; }
-  emit();
+  emit({source:'read'});
 }
 export async function dispatch(cmd) {
   if (readError) throw new Error('La escritura está protegida por un error de lectura. Exportá los datos originales.');
@@ -33,7 +33,7 @@ export async function dispatch(cmd) {
     const latest = normalizeState(JSON.parse(raw || '{}'));
     const next = applyCommand(latest,cmd);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-    current = next; emit();
+    current = next; emit({source:'command',command:cmd,previous:latest});
   };
   if (navigator.locks) return navigator.locks.request('ap2-state-write',write);
   return write();
@@ -43,7 +43,7 @@ export async function replaceLocal(data) {
   const write = () => {
     backup(undefined,'pre_import');
     localStorage.setItem(STORAGE_KEY,JSON.stringify(next));
-    current = next; readError = ''; emit();
+    current = next; readError = ''; emit({source:'import'});
   };
   if (navigator.locks) return navigator.locks.request('ap2-state-write',write);
   return write();

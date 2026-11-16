@@ -3,7 +3,10 @@ import { getState, getReadError } from './state.js';
 import { icon, html, fmt, pct } from './ui.js';
 const $ = id => document.getElementById(id);
 const color = s => s === 'aprobada' ? 'green' : s === 'en-curso' ? 'yellow' : s === 'desaprobada' ? 'red' : 'muted';
-const bar = value => `<div class="track"><span style="width:${Math.min(100,Math.max(0,value))}%"></span></div>`;
+const bar = (value,key) => {
+  const target = Math.min(100,Math.max(0,value));
+  return `<div class="track"><span data-progress-key="${key}" data-progress-value="${target}" style="width:${target}%"></span></div>`;
+};
 const action = (type, label, subject, cls = '', extra = '') => `<button class="btn ${cls}" data-action="${type}" data-subject="${subject}" ${extra}>${label}</button>`;
 
 function examAgenda(list) {
@@ -26,23 +29,22 @@ function examAgenda(list) {
 
 export function renderDash() {
   const data = getState(), s = stats(data), list = upcoming(data);
-  $('header-progress').textContent = pct(s.pct) + '%';
   const statuses = [ [s.cur,'En curso','yellow'],[s.pen,'Pendientes','muted'],...(s.des ? [[s.des,'Desaprobadas','red']] : []) ];
   $('dashboard').innerHTML = `
     <article class="panel academic-hero" aria-label="Resumen principal de la carrera">
       <div class="hero-main">
         <div class="ring" role="img" aria-label="${pct(s.pct)} por ciento de materias aprobadas">
-          <svg viewBox="0 0 180 180" aria-hidden="true"><circle class="ring-track" cx="90" cy="90" r="78"/><circle class="ring-progress" cx="90" cy="90" r="78" pathLength="100" stroke-opacity="${s.ap ? 1 : 0}" stroke-dasharray="${s.pct} 100"/></svg>
+          <svg viewBox="0 0 180 180" aria-hidden="true"><defs><linearGradient id="career-ring-gradient" gradientUnits="userSpaceOnUse" x1="18" y1="160" x2="162" y2="20"><stop offset="0" stop-color="#6b9dd7"/><stop offset=".55" stop-color="#a2c9f1"/><stop offset="1" stop-color="#d6e8fb"/></linearGradient></defs><circle class="ring-track" cx="90" cy="90" r="78"/><circle class="ring-progress" data-progress-key="career-ring" data-progress-value="${s.pct}" stroke="url(#career-ring-gradient)" cx="90" cy="90" r="78" pathLength="100" stroke-opacity="${s.ap ? 1 : 0}" stroke-dasharray="${s.pct} 100"/></svg>
           <div class="ring-center"><div class="ring-value">${pct(s.pct)}<small>%</small></div><span class="ring-caption">DE LA CARRERA</span></div>
         </div>
         <div class="hero-metrics">
           <div class="hero-metric hero-subjects">
             <div class="hero-metric-heading"><h2>Materias aprobadas</h2><p class="hero-metric-value">${s.ap} <span>/ ${TOTAL_M}</span></p></div>
-            ${bar(s.pct)}
+            ${bar(s.pct,'hero-subjects')}
           </div>
           <div class="hero-metric hero-hours">
             <div class="hero-metric-heading"><h2>Horas aprobadas</h2><p class="hero-metric-value">${s.hAp.toLocaleString('es-AR')} <span>/ ${TOTAL_H.toLocaleString('es-AR')} h</span></p></div>
-            ${bar(s.hourPct)}
+            ${bar(s.hourPct,'hero-hours')}
           </div>
         </div>
         <div class="hero-average">
@@ -56,7 +58,7 @@ export function renderDash() {
         <p class="hero-context">${s.ap === TOTAL_M ? 'Completaste todas las materias del plan.' : `Te ${TOTAL_M - s.ap === 1 ? 'queda 1 materia' : `quedan ${TOTAL_M - s.ap} materias`} para completar el plan.`}</p>
         <dl class="hero-status">${statuses.map(([n,label,c]) => `<div><dt>${label}</dt><dd class="${c}">${n}</dd></div>`).join('')}</dl>
       </div>
-      <p class="hero-note">Porcentaje sobre las ${TOTAL_M} materias del plan. Sin validez de certificación oficial.</p>
+      <details class="progress-disclosure" id="progress-info"><summary id="progress-info-summary">Cómo se calcula el progreso ${icon('chevron')}</summary><p>Se calcula por materias aprobadas sobre las ${TOTAL_M} del plan; las horas se muestran por separado. Es un indicador informativo y no constituye certificación oficial.</p></details>
     </article>
     <div class="lower-grid">
       <article class="panel agenda-card">
@@ -68,7 +70,7 @@ export function renderDash() {
         <div class="milestones">${OTROS.map(r => {
           const goal = Math.ceil(TOTAL_M * r.threshold), left = Math.max(0,goal - s.ap);
           return `<div class="milestone"><div class="milestone-title"><span class="milestone-percentage">${r.threshold * 100}%</span><h3>${r.n}</h3></div>
-            ${bar(s.ap / goal * 100)}
+            ${bar(s.ap / goal * 100,'milestone-'+r.id)}
             <div class="milestone-status"><p class="${left ? 'muted' : 'green'}">${left ? `Faltan ${left} ${left === 1 ? 'materia' : 'materias'}` : 'Requisito habilitado'}</p><span>${Math.min(s.ap,goal)} / ${goal} aprobadas</span></div></div>`;
         }).join('')}</div>
       </article>
@@ -77,7 +79,7 @@ export function renderDash() {
       <div class="year-overview-head"><div><h2>Avance por año</h2><p>Incluye las materias de idiomas de cada año.</p></div></div>
       <div class="year-mini-grid">${[1,2,3,4].map(year => {
         const mats = SUBJECTS.filter(m => m.a === year), ap = mats.filter(m => ms(data,m.n).e === 'aprobada').length;
-        return `<div class="year-mini"><div class="bar-label"><strong>${['Primer','Segundo','Tercer','Cuarto'][year-1]} año</strong><span>${pct(ap / mats.length * 100)}%</span></div>${bar(ap / mats.length * 100)}<p>${ap} de ${mats.length} aprobadas</p></div>`;
+        return `<div class="year-mini"><div class="bar-label"><strong>${['Primer','Segundo','Tercer','Cuarto'][year-1]} año</strong><span>${pct(ap / mats.length * 100)}%</span></div>${bar(ap / mats.length * 100,'overview-'+year)}<p>${ap} de ${mats.length} aprobadas</p></div>`;
       }).join('')}</div>
     </section>`;
 }
@@ -145,7 +147,7 @@ export function renderMats() {
         return cm.length ? semesterColumn(cm,`${c === 1 ? 'Primer' : 'Segundo'} cuatrimestre`,data) : '';
       }).join('');
     return `<details class="panel year-block" id="year-${year}" ${query || filter !== 'all' ? 'open' : ''}>
-      <summary class="year-summary"><div class="year-name"><h2>${year === 'ing' ? 'Idiomas' : ['Primer','Segundo','Tercer','Cuarto'][year-1]+' año'}</h2><p>${ap} de ${all.length} materias aprobadas</p></div><div class="year-progress"><div class="bar-label"><strong><span class="sr-only">Avance: </span>${pct(ap/all.length*100)}%</strong></div>${bar(ap/all.length*100)}</div><span class="chevron">${icon('chevron')}</span></summary>
+      <summary class="year-summary"><div class="year-name"><h2>${year === 'ing' ? 'Idiomas' : ['Primer','Segundo','Tercer','Cuarto'][year-1]+' año'}</h2><p>${ap} de ${all.length} materias aprobadas</p></div><div class="year-progress"><div class="bar-label"><strong><span class="sr-only">Avance: </span>${pct(ap/all.length*100)}%</strong></div>${bar(ap/all.length*100,'year-'+year)}</div><span class="chevron">${icon('chevron')}</span></summary>
       <div class="semester-grid ${year === 'ing' || new Set(mats.map(m => m.c)).size === 1 ? 'single-semester' : ''}">${columns}</div>
       <div class="year-subject-details" hidden></div>
     </details>`;
@@ -186,7 +188,9 @@ export function renderAll() {
   const active = document.activeElement;
   const focus = active && { id:active.id, action:active.dataset.action, subject:active.dataset.subject, exam:active.dataset.id, details:active.dataset.subject ? 'subject-'+active.dataset.subject : active.closest('details')?.id };
   const scroll = window.scrollY;
+  const progressInfoOpen = $('progress-info')?.open || false;
   renderDash(); renderMats();
+  $('progress-info').open = progressInfoOpen;
   openIds.forEach(id => { const el = $(id); if (el) el.open = true; });
   syncSubjectDetails();
   $('data-warning').hidden = !getReadError(); $('data-warning').textContent = getReadError();

@@ -24,7 +24,6 @@
         <a class="tab" href="#materias" data-page="materias"><span data-icon="book"></span>Materias</a>
         <a class="tab" href="#configuracion" data-page="configuracion"><span data-icon="settings"></span>Configuración</a>
       </nav>
-      <div class="mode-label" id="mode-label"><strong id="header-progress" aria-label="Porcentaje de materias del plan aprobadas">0%</strong><span>Materias aprobadas</span></div>
     </div>
   </header>
   <main id="main" tabindex="-1">
@@ -66,6 +65,7 @@
     <footer class="footer"><span>Datos guardados en este navegador</span><a href="#configuracion">Copias de seguridad</a></footer>
   </main>
   <dialog id="modal" aria-labelledby="modal-title"><form id="modal-form"><div class="modal-heading"><h2 id="modal-title"></h2><button type="button" class="icon-btn" id="modal-close" aria-label="Cerrar diálogo"><span data-icon="close"></span></button></div><div id="modal-body"></div><p id="modal-error" class="form-error" role="alert"></p><div class="modal-foot"><button type="button" class="btn" id="modal-cancel">Cancelar</button><button type="submit" class="btn primary" id="modal-submit">Guardar</button></div></form></dialog>
+  <aside class="milestone-notice" id="milestone-notice" role="status" aria-live="polite" aria-atomic="true" hidden><span class="milestone-notice-icon" aria-hidden="true"></span><div><strong></strong><p></p></div></aside>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script type="module" src="./js/app.js"></script>
 </body>

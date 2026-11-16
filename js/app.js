@@ -3,6 +3,7 @@ import { SUBJECTS, ms } from './core.js';
 import { renderAll, renderMats, renderBackups, syncSubjectDetails } from './render.js';
 import { initActions } from './actions.js';
 import { hydrateIcons } from './ui.js';
+import { initVisualEffects } from './effects.js';
 const $=id => document.getElementById(id);
 let currentPage;
 const pageScroll = new Map();
@@ -36,3 +37,4 @@ $('status-filter').addEventListener('change',filter);
 window.addEventListener('hashchange',navigate); navigate();
 // Old browser-held Telegram secrets are obsolete. Academic state is untouched.
 try { localStorage.removeItem('ap2_tgt'); localStorage.removeItem('ap2_tgc'); } catch { /* State reader already reports unavailable storage. */ }
+initVisualEffects();

@@ -4,9 +4,10 @@ import assert from 'node:assert/strict';
 import {fileURLToPath} from 'node:url';
 import fs from 'node:fs/promises';
 const base='http://127.0.0.1:4173/mi-carrera/';
-async function capture(page,name) {
+export async function capture(page,name) {
   const path=fileURLToPath(new URL('../docs/'+name+'.png',import.meta.url));
   await page.mouse.move(0,0);
+  await page.evaluate(async() => { await Promise.allSettled(document.getAnimations().map(animation => animation.finished)); });
   const buffer=await page.screenshot({fullPage:true});
   try { if (buffer.equals(await fs.readFile(path))) return; }
   catch(err) { if (err.code !== 'ENOENT') throw err; }

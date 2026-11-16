@@ -64,3 +64,16 @@ test('updates use latest storage, emit once and storage events synchronize views
   const event=new Event('storage'); event.key='ap2_state'; window.dispatchEvent(event);
   assert.equal(s.getState()['Inglés II'].nota,9); assert.equal(events,2);
 });
+
+test('presentation events identify successful commands, reads and imports precisely',async() => {
+  const {s,storage}=await setup('{}'); const events=[];
+  s.subscribe(event => { events.push(event); assert.deepEqual(JSON.parse(storage.getItem('ap2_state')),s.getState()); });
+  await s.dispatch({type:'equivalence',subject:'inf'});
+  assert.equal(events[0].source,'command'); assert.equal(events[0].command.type,'equivalence');
+  assert.deepEqual(events[0].previous,{});
+  s.readLocal(); assert.equal(events[1].source,'read');
+  await s.replaceLocal({}); assert.equal(events[2].source,'import');
+  storage.failWrite=true;
+  await assert.rejects(s.dispatch({type:'equivalence',subject:'inf'}));
+  assert.equal(events.length,3);
+});

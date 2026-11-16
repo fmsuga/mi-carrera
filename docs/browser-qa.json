@@ -1,5 +1,5 @@
 {
-  "checks": 54,
+  "checks": 76,
   "results": [
     "Un único resumen principal sin tarjetas internas",
     "Materias y horas reales integradas en la hero card",
@@ -54,7 +54,29 @@
     "Lectura corrupta muestra protección de datos",
     "Lectura corrupta no sobrescribe los bytes originales",
     "Sin errores JavaScript en las pruebas del navegador",
-    "La aplicación no realiza solicitudes a servicios externos"
+    "La aplicación no realiza solicitudes a servicios externos",
+    "Header sin porcentaje duplicado",
+    "Anillo y barras tienen una entrada finita desde cero",
+    "Todas las animaciones de indicadores son breves y sin bucles",
+    "La entrada termina en el porcentaje real y el número siempre muestra el valor correcto",
+    "Las animaciones no modifican registros académicos",
+    "La carga de datos existentes no dispara celebraciones",
+    "Navegar entre vistas no reinicia el anillo sin cambios de progreso",
+    "La aclaración oficial se presenta de forma discreta",
+    "La explicación del cálculo y su alcance están disponibles por teclado o clic",
+    "Una operación sin cambio de porcentaje no vuelve a animar el anillo",
+    "Una aprobación que cruza 40% celebra el hito real",
+    "La celebración se muestra únicamente en la pestaña que realizó la aprobación",
+    "La explicación abierta conserva su estado tras actualizar datos",
+    "La celebración se retira sola y no bloquea controles",
+    "Recargar después del 40% no repite la celebración",
+    "Revertir y volver a cruzar un hito ya registrado no lo celebra otra vez",
+    "El cruce real de 70% también se celebra en mobile",
+    "Movimiento reducido desactiva entrada, transiciones y animación de la celebración",
+    "Recargar con movimiento reducido mantiene todo estático y no repite hitos",
+    "Importar datos que superan ambos umbrales no dispara celebraciones",
+    "Una migración real de exámenes antiguos conserva los datos y no celebra hitos",
+    "Sin errores JavaScript en las pruebas de acabados y celebraciones"
   ],
   "dimensions": [
     "1920:inicio",
