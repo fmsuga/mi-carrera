@@ -6,4 +6,5 @@ La uso para organizar las materias, registrar cursadas, notas y exámenes, consu
 
 Los datos se guardan localmente en el navegador, con la posibilidad de exportar e importar copias de seguridad.
 
+
 [**Ver aplicación**](https://fmsuga.github.io/mi-carrera/)
